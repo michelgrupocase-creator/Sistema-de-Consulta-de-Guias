@@ -3,406 +3,724 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Grupo CASE — Modelo</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Grupo CASE — Contabilidade & Gestão Empresarial</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+
 :root {
-  --gold:  #f0c840;
-  --gold2: #d4a217;
-  --gold3: #8a6200;
-  --glow:  rgba(212,162,23,0.20);
-  --gline: rgba(212,162,23,0.32);
-  --bg:    #0d0d0d;
-  --s0:    #141414;
-  --s1:    #1e1e1e;
-  --s2:    #272727;
-  --s3:    #313131;
-  --t1:    #f5f0e3;
-  --t2:    #d8d0b8;
-  --t3:    #b0a882;
+  --black:  #080808;
+  --black2: #0f0f0f;
+  --black3: #161616;
+  --black4: #1c1c1c;
+  --black5: #242424;
+  --black6: #2e2e2e;
+  --gold:   #c9a84c;
+  --gold2:  #e8c96e;
+  --gold3:  #a07830;
+  --gold4:  #6b4f1a;
+  --glow:   rgba(201,168,76,0.15);
+  --gline:  rgba(201,168,76,0.25);
+  --text1:  #f2ede4;
+  --text2:  #c8bfa8;
+  --text3:  #8c8070;
+  --text4:  #504840;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body { background: var(--bg); color: var(--t1); font-family: 'Inter', sans-serif; }
 
-/* ── NAV ── */
-nav {
-  position: sticky; top: 0; z-index: 100;
-  height: 64px;
-  background: rgba(13,13,13,0.95);
-  border-bottom: 1px solid var(--s3);
-  backdrop-filter: blur(16px);
+body {
+  background: var(--black);
+  color: var(--text1);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ─── NAV ─── */
+header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+  height: 72px;
   display: flex; align-items: center; justify-content: space-between;
-  padding: 0 48px;
+  padding: 0 60px;
+  background: rgba(8,8,8,0.92);
+  border-bottom: 1px solid rgba(201,168,76,0.12);
+  backdrop-filter: blur(20px);
+  transition: background .3s;
 }
-.nav-logo {
-  font-family: 'Playfair Display', serif;
-  font-size: 22px; font-weight: 700;
-  color: var(--gold);
-  letter-spacing: 0.06em;
+.logo {
+  display: flex; align-items: center; gap: 14px;
+  text-decoration: none;
 }
-.nav-logo span { color: var(--t1); }
-.nav-links { display: flex; gap: 32px; }
-.nav-links a {
-  text-decoration: none; color: var(--t2);
-  font-size: 12px; font-weight: 500;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  transition: color .2s;
-}
-.nav-links a:hover { color: var(--gold); }
-.nav-cta {
-  background: linear-gradient(135deg, var(--gold), var(--gold2));
-  color: #000; border: none; padding: 10px 22px;
-  border-radius: 6px; font-size: 11px; font-weight: 700;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  cursor: pointer; transition: all .2s;
-}
-.nav-cta:hover { filter: brightness(1.1); transform: translateY(-1px); }
-
-/* ── HERO ── */
-.hero {
-  min-height: 88vh;
+.logo-mark {
+  width: 36px; height: 36px;
+  border: 1.5px solid var(--gold);
   display: flex; align-items: center; justify-content: center;
-  text-align: center;
-  background: radial-gradient(ellipse at 50% 60%, rgba(212,162,23,0.07) 0%, transparent 65%);
-  padding: 80px 24px;
-  position: relative;
-  border-bottom: 1px solid var(--gline);
-}
-.hero-badge {
-  display: inline-block;
-  border: 1px solid var(--gline);
-  color: var(--gold);
-  font-size: 10px; font-weight: 700;
-  letter-spacing: 0.3em; text-transform: uppercase;
-  padding: 6px 18px; border-radius: 20px;
-  margin-bottom: 28px;
-  background: rgba(212,162,23,0.06);
-}
-.hero h1 {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(38px, 6vw, 72px);
-  font-weight: 700; line-height: 1.1;
-  color: var(--t1);
-  max-width: 780px;
+  font-size: 14px; font-weight: 700; color: var(--gold);
+  letter-spacing: 0.05em;
 }
-.hero h1 em { color: var(--gold); font-style: normal; }
-.hero-sub {
-  margin-top: 20px;
-  font-size: 16px; color: var(--t2); line-height: 1.7;
-  max-width: 520px; margin-left: auto; margin-right: auto;
+.logo-text {
+  display: flex; flex-direction: column; line-height: 1;
 }
-.hero-actions { display: flex; gap: 14px; justify-content: center; margin-top: 36px; flex-wrap: wrap; }
+.logo-text strong {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px; font-weight: 600; color: var(--text1);
+  letter-spacing: 0.12em; text-transform: uppercase;
+}
+.logo-text span {
+  font-size: 9px; font-weight: 400; color: var(--gold);
+  letter-spacing: 0.25em; text-transform: uppercase; margin-top: 3px;
+}
+nav { display: flex; align-items: center; gap: 40px; }
+nav a {
+  text-decoration: none; color: var(--text3);
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  transition: color .2s; position: relative;
+}
+nav a::after {
+  content: ''; position: absolute; bottom: -4px; left: 0; right: 0;
+  height: 1px; background: var(--gold);
+  transform: scaleX(0); transition: transform .25s;
+}
+nav a:hover { color: var(--text1); }
+nav a:hover::after { transform: scaleX(1); }
+.btn-nav {
+  height: 38px; padding: 0 24px;
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-family: 'Inter', sans-serif;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  cursor: pointer; transition: all .25s;
+}
+.btn-nav:hover {
+  background: var(--gold); color: var(--black);
+}
+
+/* ─── HERO ─── */
+.hero {
+  min-height: 100vh;
+  display: grid; grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding: 72px 0 0;
+  position: relative; overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 60% 80% at 70% 50%, rgba(201,168,76,0.05) 0%, transparent 70%),
+    linear-gradient(180deg, var(--black) 0%, var(--black2) 100%);
+}
+.hero-grid-lines {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse at 70% 50%, black 20%, transparent 70%);
+}
+.hero-left {
+  padding: 80px 60px 80px 100px;
+  position: relative; z-index: 1;
+}
+.hero-eyebrow {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 28px;
+}
+.hero-eyebrow-line { width: 32px; height: 1px; background: var(--gold); }
+.hero-eyebrow span {
+  font-size: 10px; font-weight: 500; color: var(--gold);
+  letter-spacing: 0.3em; text-transform: uppercase;
+}
+.hero-h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(40px, 4.5vw, 64px);
+  font-weight: 600; line-height: 1.1;
+  color: var(--text1);
+}
+.hero-h1 em {
+  font-style: italic; color: var(--gold);
+}
+.hero-p {
+  margin-top: 24px;
+  font-size: 15px; font-weight: 300; line-height: 1.8;
+  color: var(--text2); max-width: 420px;
+}
+.hero-actions {
+  display: flex; gap: 16px; margin-top: 44px; flex-wrap: wrap;
+}
 .btn-primary {
-  background: linear-gradient(135deg, var(--gold), var(--gold2));
-  color: #000; border: none; padding: 14px 32px;
-  border-radius: 6px; font-size: 13px; font-weight: 700;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  cursor: pointer; transition: all .2s;
-  box-shadow: 0 4px 20px var(--glow);
+  height: 52px; padding: 0 36px;
+  background: var(--gold);
+  color: var(--black);
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  cursor: pointer; transition: all .25s;
 }
-.btn-primary:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(212,162,23,.4); }
-.btn-outline {
-  background: transparent; color: var(--t1);
-  border: 1px solid var(--s3); padding: 14px 32px;
-  border-radius: 6px; font-size: 13px; font-weight: 600;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  cursor: pointer; transition: all .2s;
+.btn-primary:hover {
+  background: var(--gold2);
+  box-shadow: 0 8px 32px rgba(201,168,76,0.35);
+  transform: translateY(-2px);
 }
-.btn-outline:hover { border-color: var(--gline); color: var(--gold); }
-.hero-divider {
-  position: absolute; bottom: -1px; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold2), transparent);
+.btn-secondary {
+  height: 52px; padding: 0 36px;
+  background: transparent;
+  color: var(--text2);
+  border: 1px solid var(--black6);
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  cursor: pointer; transition: all .25s;
 }
-
-/* ── NÚMEROS ── */
-.stats {
-  background: var(--s0);
-  border-bottom: 1px solid var(--s3);
-  padding: 48px 24px;
+.btn-secondary:hover {
+  border-color: var(--gline); color: var(--text1);
 }
-.stats-inner {
-  max-width: 1000px; margin: 0 auto;
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 1px; background: var(--s3);
-  border: 1px solid var(--s3); border-radius: 10px; overflow: hidden;
+.hero-right {
+  padding: 80px 100px 80px 40px;
+  position: relative; z-index: 1;
+  display: flex; align-items: center; justify-content: center;
 }
-.stat {
-  background: var(--s1); padding: 28px 24px; text-align: center;
+.hero-card {
+  background: var(--black3);
+  border: 1px solid var(--black6);
+  padding: 48px 44px;
+  position: relative; width: 100%; max-width: 400px;
 }
-.stat-num {
+.hero-card::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--gold3), var(--gold2), var(--gold3));
+}
+.hc-label {
+  font-size: 9px; font-weight: 600; color: var(--gold);
+  letter-spacing: 0.3em; text-transform: uppercase; margin-bottom: 32px;
+}
+.hc-stat { margin-bottom: 28px; }
+.hc-stat:last-of-type { margin-bottom: 0; }
+.hc-num {
   font-family: 'Playfair Display', serif;
-  font-size: 36px; font-weight: 700;
-  color: var(--gold);
+  font-size: 44px; font-weight: 600; color: var(--text1);
+  line-height: 1;
 }
-.stat-label { font-size: 11px; color: var(--t3); margin-top: 4px; letter-spacing: 0.08em; text-transform: uppercase; }
+.hc-num sup { font-size: 20px; color: var(--gold); vertical-align: super; }
+.hc-desc { font-size: 11px; color: var(--text3); margin-top: 4px; letter-spacing: 0.08em; }
+.hc-divider { height: 1px; background: var(--black6); margin: 24px 0; }
 
-/* ── SERVIÇOS ── */
-.section { padding: 80px 24px; }
-.section-inner { max-width: 1000px; margin: 0 auto; }
-.section-tag {
-  display: inline-block;
-  color: var(--gold); font-size: 10px; font-weight: 700;
-  letter-spacing: 0.3em; text-transform: uppercase;
-  margin-bottom: 12px;
+/* ─── STRIP ─── */
+.strip {
+  border-top: 1px solid var(--black5);
+  border-bottom: 1px solid var(--black5);
+  background: var(--black2);
+  padding: 20px 100px;
+  display: flex; gap: 0; overflow: hidden;
 }
-.section-title {
+.strip-item {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 10px 20px; border-right: 1px solid var(--black5);
+  font-size: 11px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase;
+  white-space: nowrap;
+}
+.strip-item:last-child { border-right: none; }
+.strip-dot { width: 5px; height: 5px; background: var(--gold); border-radius: 50%; flex-shrink: 0; }
+
+/* ─── SEÇÃO BASE ─── */
+.section { padding: 100px 100px; }
+.section-alt { background: var(--black2); border-top: 1px solid var(--black5); border-bottom: 1px solid var(--black5); }
+.label {
+  font-size: 9px; font-weight: 600; color: var(--gold);
+  letter-spacing: 0.35em; text-transform: uppercase;
+  display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+}
+.label::before { content: ''; width: 24px; height: 1px; background: var(--gold); }
+.section-h {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(28px, 4vw, 42px); font-weight: 700;
-  color: var(--t1); line-height: 1.2;
+  font-size: clamp(32px, 3.5vw, 52px);
+  font-weight: 600; line-height: 1.15; color: var(--text1);
 }
-.gold-bar { width: 40px; height: 2px; background: linear-gradient(90deg, var(--gold), var(--gold3)); border-radius: 1px; margin: 16px 0 36px; }
+.section-h em { font-style: italic; color: var(--gold); }
+.section-p {
+  font-size: 14px; font-weight: 300; line-height: 1.8;
+  color: var(--text2); margin-top: 18px; max-width: 520px;
+}
+.rule { width: 48px; height: 1px; background: linear-gradient(90deg, var(--gold), transparent); margin: 28px 0 52px; }
+
+/* ─── SERVIÇOS ─── */
+.services-layout {
+  display: grid; grid-template-columns: 340px 1fr; gap: 80px; align-items: start;
+}
 .services-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+  background: var(--black5); border: 1px solid var(--black5);
 }
-.service-card {
-  background: var(--s1); border: 1px solid var(--s3);
-  border-radius: 10px; padding: 28px 24px;
-  transition: all .2s; position: relative; overflow: hidden;
+.srv {
+  background: var(--black3);
+  padding: 32px 28px;
+  transition: background .2s;
+  cursor: default;
 }
-.service-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, var(--gold), var(--gold3));
-  opacity: 0; transition: opacity .2s;
-}
-.service-card:hover { border-color: var(--gline); background: var(--s2); transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,.5); }
-.service-card:hover::before { opacity: 1; }
-.service-icon { font-size: 28px; margin-bottom: 16px; }
-.service-name { font-size: 15px; font-weight: 600; color: var(--t1); margin-bottom: 8px; }
-.service-desc { font-size: 12px; color: var(--t2); line-height: 1.6; }
-
-/* ── DIFERENCIAIS ── */
-.diff-section { background: var(--s0); border-top: 1px solid var(--s3); border-bottom: 1px solid var(--s3); }
-.diff-grid {
-  display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px; align-items: center;
-}
-.diff-text .section-title { margin-bottom: 24px; }
-.diff-list { display: flex; flex-direction: column; gap: 16px; }
-.diff-item { display: flex; gap: 14px; align-items: flex-start; }
-.diff-dot {
-  width: 8px; height: 8px; background: var(--gold);
-  border-radius: 50%; flex-shrink: 0; margin-top: 5px;
-}
-.diff-item-text { font-size: 13px; color: var(--t2); line-height: 1.6; }
-.diff-item-text strong { color: var(--t1); }
-.diff-visual {
-  background: var(--s1); border: 1px solid var(--gline);
-  border-radius: 12px; padding: 36px;
-  display: flex; flex-direction: column; gap: 16px;
-}
-.diff-quote {
+.srv:hover { background: var(--black4); }
+.srv-num {
   font-family: 'Playfair Display', serif;
-  font-size: 20px; color: var(--t1); line-height: 1.5;
+  font-size: 11px; color: var(--gold3);
+  letter-spacing: 0.1em; margin-bottom: 16px;
 }
-.diff-quote em { color: var(--gold); font-style: italic; }
-.diff-author { font-size: 11px; color: var(--t3); letter-spacing: 0.1em; text-transform: uppercase; }
+.srv-name {
+  font-size: 13px; font-weight: 600; color: var(--text1);
+  line-height: 1.4; margin-bottom: 8px;
+}
+.srv-desc { font-size: 11px; font-weight: 300; color: var(--text3); line-height: 1.7; }
 
-/* ── CTA ── */
-.cta-section {
-  padding: 80px 24px; text-align: center;
-  background: radial-gradient(ellipse at 50% 50%, rgba(212,162,23,0.06) 0%, transparent 60%);
+/* ─── SOBRE / PILARES ─── */
+.pillars {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: var(--black5);
+  border: 1px solid var(--black5);
+  margin-top: 52px;
 }
-.cta-title {
+.pillar {
+  background: var(--black3); padding: 36px 28px;
+  transition: background .2s;
+}
+.pillar:hover { background: var(--black4); }
+.pillar-icon {
+  font-size: 22px; margin-bottom: 20px;
+  display: block;
+}
+.pillar-name { font-size: 12px; font-weight: 600; color: var(--text1); margin-bottom: 8px; }
+.pillar-desc { font-size: 11px; font-weight: 300; color: var(--text3); line-height: 1.7; }
+
+/* ─── QUOTE ─── */
+.quote-section {
+  padding: 0 100px 100px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+}
+.quote-block {
+  border-left: 2px solid var(--gold);
+  padding: 32px 40px;
+  background: var(--black3);
+}
+.quote-text {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(28px, 4vw, 48px); font-weight: 700;
-  color: var(--t1); margin-bottom: 16px;
+  font-size: 22px; font-style: italic; font-weight: 500;
+  color: var(--text1); line-height: 1.6;
 }
-.cta-title em { color: var(--gold); font-style: normal; }
-.cta-sub { font-size: 15px; color: var(--t2); margin-bottom: 36px; }
+.quote-text em { color: var(--gold); }
+.quote-author { font-size: 10px; color: var(--text3); letter-spacing: 0.2em; text-transform: uppercase; margin-top: 20px; }
+.about-text .label { margin-bottom: 16px; }
+.about-text .section-h { font-size: clamp(28px, 2.8vw, 42px); }
+.about-list { margin-top: 32px; display: flex; flex-direction: column; gap: 18px; }
+.about-item { display: flex; gap: 16px; }
+.about-item-bar { width: 2px; background: linear-gradient(180deg, var(--gold), transparent); flex-shrink: 0; min-height: 40px; }
+.about-item-text { font-size: 12px; font-weight: 300; color: var(--text2); line-height: 1.7; }
+.about-item-text strong { color: var(--text1); font-weight: 600; display: block; margin-bottom: 2px; font-size: 13px; }
 
-/* ── CONTATO ── */
-.contact-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 800px; margin: 0 auto;
+/* ─── CONTATO ─── */
+.contact-layout {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start;
 }
-.contact-card {
-  background: var(--s1); border: 1px solid var(--s3);
-  border-radius: 10px; padding: 24px; text-align: center;
-  transition: border-color .2s;
+.contact-form { display: flex; flex-direction: column; gap: 16px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 9px; font-weight: 600; color: var(--gold); letter-spacing: 0.25em; text-transform: uppercase; }
+.field input, .field textarea, .field select {
+  background: var(--black3); border: 1px solid var(--black6);
+  color: var(--text1); padding: 14px 16px;
+  font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 300;
+  outline: none; transition: border-color .2s;
+  resize: none;
 }
-.contact-card:hover { border-color: var(--gline); }
-.contact-icon { font-size: 24px; margin-bottom: 10px; }
-.contact-type { font-size: 10px; font-weight: 700; color: var(--gold); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 6px; }
-.contact-value { font-size: 13px; color: var(--t1); }
+.field input:focus, .field textarea:focus, .field select:focus { border-color: var(--gold3); }
+.field input::placeholder, .field textarea::placeholder { color: var(--text4); }
+.field textarea { min-height: 120px; }
+.field select { color: var(--text2); cursor: pointer; appearance: none; }
+.field select option { background: var(--black3); }
+.btn-submit {
+  height: 52px; background: var(--gold); color: var(--black);
+  border: none; font-family: 'Inter', sans-serif;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  cursor: pointer; transition: all .25s; margin-top: 8px;
+}
+.btn-submit:hover { background: var(--gold2); box-shadow: 0 8px 32px rgba(201,168,76,.3); transform: translateY(-2px); }
+.contact-info { display: flex; flex-direction: column; gap: 28px; padding-top: 8px; }
+.ci-item { display: flex; gap: 20px; align-items: flex-start; }
+.ci-icon-wrap {
+  width: 44px; height: 44px; flex-shrink: 0;
+  border: 1px solid var(--black6);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.ci-type { font-size: 9px; font-weight: 600; color: var(--gold); letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 4px; }
+.ci-value { font-size: 13px; color: var(--text1); }
+.ci-note { font-size: 11px; color: var(--text3); margin-top: 2px; }
 
-/* ── FOOTER ── */
+/* ─── FOOTER ─── */
 footer {
-  background: var(--s0); border-top: 1px solid var(--s3);
-  padding: 32px 48px;
+  background: var(--black2);
+  border-top: 1px solid var(--black5);
+  padding: 48px 100px 32px;
+}
+.footer-top {
+  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 60px;
+  padding-bottom: 40px; border-bottom: 1px solid var(--black5);
+}
+.footer-brand { max-width: 280px; }
+.footer-brand .logo { margin-bottom: 18px; }
+.footer-brand p { font-size: 12px; font-weight: 300; color: var(--text3); line-height: 1.8; }
+.footer-col h4 {
+  font-size: 9px; font-weight: 600; color: var(--gold);
+  letter-spacing: 0.3em; text-transform: uppercase; margin-bottom: 18px;
+}
+.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.footer-col ul li a {
+  text-decoration: none; color: var(--text3);
+  font-size: 12px; transition: color .2s;
+}
+.footer-col ul li a:hover { color: var(--text1); }
+.footer-bottom {
   display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: 12px;
+  padding-top: 28px; flex-wrap: wrap; gap: 12px;
 }
-.footer-logo {
-  font-family: 'Playfair Display', serif;
-  font-size: 18px; font-weight: 700; color: var(--gold);
-}
-.footer-copy { font-size: 11px; color: var(--t3); }
+.footer-copy { font-size: 11px; color: var(--text4); }
+.footer-crc { font-size: 10px; color: var(--gold3); letter-spacing: 0.1em; }
 
-/* ── RESPONSIVO ── */
-@media (max-width: 768px) {
-  nav { padding: 0 20px; }
-  .nav-links { display: none; }
-  .stats-inner { grid-template-columns: repeat(2, 1fr); }
+/* ─── RESPONSIVO ─── */
+@media (max-width: 1024px) {
+  header { padding: 0 32px; }
+  nav { display: none; }
+  .hero { grid-template-columns: 1fr; padding-top: 72px; }
+  .hero-left { padding: 60px 32px; }
+  .hero-right { padding: 0 32px 60px; }
+  .strip { padding: 16px 32px; flex-wrap: wrap; gap: 8px; }
+  .section { padding: 60px 32px; }
+  .services-layout { grid-template-columns: 1fr; gap: 40px; }
+  .pillars { grid-template-columns: 1fr 1fr; }
+  .quote-section { grid-template-columns: 1fr; padding: 0 32px 60px; gap: 40px; }
+  .contact-layout { grid-template-columns: 1fr; gap: 40px; }
+  .footer-top { grid-template-columns: 1fr 1fr; }
+  footer { padding: 40px 32px 24px; }
+  .footer-bottom { padding: 0 32px 32px; }
+}
+@media (max-width: 600px) {
+  .hero-card { display: none; }
   .services-grid { grid-template-columns: 1fr; }
-  .diff-grid { grid-template-columns: 1fr; }
-  .contact-grid { grid-template-columns: 1fr; }
-  footer { flex-direction: column; text-align: center; }
+  .pillars { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .footer-top { grid-template-columns: 1fr; }
+  .strip-item { flex: none; width: 50%; }
 }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav>
-  <div class="nav-logo">CASE<span> Contabilidade</span></div>
-  <div class="nav-links">
+<!-- HEADER -->
+<header>
+  <a href="#" class="logo">
+    <div class="logo-mark">C</div>
+    <div class="logo-text">
+      <strong>Grupo CASE</strong>
+      <span>Contabilidade & Gestão</span>
+    </div>
+  </a>
+  <nav>
     <a href="#servicos">Serviços</a>
-    <a href="#diferenciais">Sobre</a>
+    <a href="#sobre">Sobre</a>
     <a href="#contato">Contato</a>
-  </div>
-  <button class="nav-cta">Fale Conosco</button>
-</nav>
+  </nav>
+  <button class="btn-nav">Solicitar Proposta</button>
+</header>
 
 <!-- HERO -->
 <section class="hero">
-  <div>
-    <div class="hero-badge">Grupo CASE — Há mais de X anos no mercado</div>
-    <h1>Sua empresa em <em>boas mãos.</em><br>Contabilidade que <em>gera resultado.</em></h1>
-    <p class="hero-sub">Soluções contábeis, fiscais e trabalhistas para empresas de todos os portes. Atendimento personalizado e tecnologia a favor do seu negócio.</p>
+  <div class="hero-bg"></div>
+  <div class="hero-grid-lines"></div>
+  <div class="hero-left">
+    <div class="hero-eyebrow">
+      <div class="hero-eyebrow-line"></div>
+      <span>Contabilidade Especializada</span>
+    </div>
+    <h1 class="hero-h1">
+      Gestão contábil<br>
+      com <em>precisão</em><br>
+      e <em>inteligência.</em>
+    </h1>
+    <p class="hero-p">
+      O Grupo CASE oferece soluções contábeis, fiscais e trabalhistas que transformam a complexidade burocrática em vantagem competitiva para o seu negócio.
+    </p>
     <div class="hero-actions">
       <button class="btn-primary">Solicitar Proposta</button>
-      <button class="btn-outline">Conheça nossos serviços</button>
+      <button class="btn-secondary">Conheça os Serviços</button>
     </div>
   </div>
-  <div class="hero-divider"></div>
+  <div class="hero-right">
+    <div class="hero-card">
+      <div class="hc-label">Grupo CASE em números</div>
+      <div class="hc-stat">
+        <div class="hc-num"><sup>+</sup>500</div>
+        <div class="hc-desc">Empresas atendidas</div>
+      </div>
+      <div class="hc-divider"></div>
+      <div class="hc-stat">
+        <div class="hc-num"><sup>+</sup>15</div>
+        <div class="hc-desc">Anos de experiência no mercado</div>
+      </div>
+      <div class="hc-divider"></div>
+      <div class="hc-stat">
+        <div class="hc-num">98<sup>%</sup></div>
+        <div class="hc-desc">Taxa de retenção de clientes</div>
+      </div>
+    </div>
+  </div>
 </section>
 
-<!-- NÚMEROS -->
-<section class="stats">
-  <div class="stats-inner">
-    <div class="stat">
-      <div class="stat-num">+500</div>
-      <div class="stat-label">Clientes ativos</div>
-    </div>
-    <div class="stat">
-      <div class="stat-num">+15</div>
-      <div class="stat-label">Anos de experiência</div>
-    </div>
-    <div class="stat">
-      <div class="stat-num">98%</div>
-      <div class="stat-label">Satisfação dos clientes</div>
-    </div>
-    <div class="stat">
-      <div class="stat-num">+20</div>
-      <div class="stat-label">Especialistas</div>
-    </div>
-  </div>
-</section>
+<!-- STRIP -->
+<div class="strip">
+  <div class="strip-item"><div class="strip-dot"></div>Simples Nacional</div>
+  <div class="strip-item"><div class="strip-dot"></div>Lucro Presumido</div>
+  <div class="strip-item"><div class="strip-dot"></div>Lucro Real</div>
+  <div class="strip-item"><div class="strip-dot"></div>MEI & Autônomos</div>
+  <div class="strip-item"><div class="strip-dot"></div>BPO Financeiro</div>
+</div>
 
 <!-- SERVIÇOS -->
 <section class="section" id="servicos">
-  <div class="section-inner">
-    <div class="section-tag">O que fazemos</div>
-    <h2 class="section-title">Serviços especializados<br>para o seu negócio</h2>
-    <div class="gold-bar"></div>
+  <div class="services-layout">
+    <div>
+      <div class="label">O que oferecemos</div>
+      <h2 class="section-h">Serviços que<br>impulsionam sua<br><em>empresa.</em></h2>
+      <div class="rule"></div>
+      <p class="section-p">
+        Do registro ao planejamento estratégico — cuidamos de toda a parte contábil para que você possa se dedicar ao crescimento do seu negócio.
+      </p>
+    </div>
     <div class="services-grid">
-      <div class="service-card">
-        <div class="service-icon">🏢</div>
-        <div class="service-name">Abertura de Empresas</div>
-        <div class="service-desc">Constituição e registro de empresas com agilidade. MEI, ME, EPP e grandes empresas.</div>
+      <div class="srv">
+        <div class="srv-num">01</div>
+        <div class="srv-name">Contabilidade Empresarial</div>
+        <div class="srv-desc">Escrituração contábil, balanços patrimoniais e demonstrações financeiras com total conformidade legal.</div>
       </div>
-      <div class="service-card">
-        <div class="service-icon">📊</div>
-        <div class="service-name">Contabilidade Gerencial</div>
-        <div class="service-desc">Relatórios financeiros e gerenciais para apoiar a tomada de decisão do seu negócio.</div>
+      <div class="srv">
+        <div class="srv-num">02</div>
+        <div class="srv-name">Planejamento Tributário</div>
+        <div class="srv-desc">Redução legal da carga tributária através de análise e escolha do melhor regime fiscal para sua empresa.</div>
       </div>
-      <div class="service-card">
-        <div class="service-icon">💼</div>
-        <div class="service-name">Departamento Pessoal</div>
-        <div class="service-desc">Folha de pagamento, eSocial, admissões, demissões e toda a gestão de RH.</div>
+      <div class="srv">
+        <div class="srv-num">03</div>
+        <div class="srv-name">Departamento Pessoal</div>
+        <div class="srv-desc">Folha de pagamento, eSocial, admissões, rescisões e toda a gestão trabalhista da sua equipe.</div>
       </div>
-      <div class="service-card">
-        <div class="service-icon">📋</div>
-        <div class="service-name">Obrigações Fiscais</div>
-        <div class="service-desc">Apuração de impostos, entrega de obrigações acessórias e planejamento tributário.</div>
+      <div class="srv">
+        <div class="srv-num">04</div>
+        <div class="srv-name">Abertura & Regularização</div>
+        <div class="srv-desc">Constituição de empresas, alterações societárias, regularizações fiscais e encerramento.</div>
       </div>
-      <div class="service-card">
-        <div class="service-icon">💰</div>
-        <div class="service-name">Imposto de Renda PF</div>
-        <div class="service-desc">Declaração de IR para pessoas físicas, com análise para maximizar sua restituição.</div>
+      <div class="srv">
+        <div class="srv-num">05</div>
+        <div class="srv-name">Imposto de Renda PF</div>
+        <div class="srv-desc">Declaração de IR com análise completa para maximizar sua restituição e evitar malha fina.</div>
       </div>
-      <div class="service-card">
-        <div class="service-icon">📈</div>
-        <div class="service-name">BPO Financeiro</div>
-        <div class="service-desc">Terceirização do financeiro: contas a pagar, receber, fluxo de caixa e conciliação.</div>
+      <div class="srv">
+        <div class="srv-num">06</div>
+        <div class="srv-name">BPO Financeiro</div>
+        <div class="srv-desc">Gestão completa do financeiro: contas, fluxo de caixa, conciliações e relatórios gerenciais.</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- DIFERENCIAIS -->
-<section class="section diff-section" id="diferenciais">
-  <div class="section-inner">
-    <div class="diff-grid">
-      <div class="diff-text">
-        <div class="section-tag">Por que a CASE</div>
-        <h2 class="section-title">Mais do que contabilidade —<br>um parceiro de negócios</h2>
-        <div class="gold-bar"></div>
-        <div class="diff-list">
-          <div class="diff-item">
-            <div class="diff-dot"></div>
-            <div class="diff-item-text"><strong>Atendimento humanizado</strong> — você fala diretamente com seu contador, sem intermediários.</div>
-          </div>
-          <div class="diff-item">
-            <div class="diff-dot"></div>
-            <div class="diff-item-text"><strong>Tecnologia de ponta</strong> — sistemas integrados para agilidade e precisão nas entregas.</div>
-          </div>
-          <div class="diff-item">
-            <div class="diff-dot"></div>
-            <div class="diff-item-text"><strong>Equipe especializada</strong> — profissionais com experiência em múltiplos segmentos e regimes tributários.</div>
-          </div>
-          <div class="diff-item">
-            <div class="diff-dot"></div>
-            <div class="diff-item-text"><strong>Transparência total</strong> — relatórios claros e comunicação proativa sobre prazos e obrigações.</div>
-          </div>
+<!-- SOBRE / PILARES -->
+<section class="section section-alt" id="sobre">
+  <div class="label">Nossa essência</div>
+  <h2 class="section-h">Por que escolher o<br><em>Grupo CASE?</em></h2>
+  <div class="pillars">
+    <div class="pillar">
+      <span class="pillar-icon">◈</span>
+      <div class="pillar-name">Atendimento Personalizado</div>
+      <div class="pillar-desc">Você tem um contador dedicado, que conhece sua empresa e está disponível quando precisar.</div>
+    </div>
+    <div class="pillar">
+      <span class="pillar-icon">◈</span>
+      <div class="pillar-name">Tecnologia Integrada</div>
+      <div class="pillar-desc">Sistemas digitais que agilizam processos, reduzem erros e mantêm tudo organizado e acessível.</div>
+    </div>
+    <div class="pillar">
+      <span class="pillar-icon">◈</span>
+      <div class="pillar-name">Equipe Especializada</div>
+      <div class="pillar-desc">Profissionais com formação sólida e atualização constante em legislação fiscal e trabalhista.</div>
+    </div>
+    <div class="pillar">
+      <span class="pillar-icon">◈</span>
+      <div class="pillar-name">Transparência Total</div>
+      <div class="pillar-desc">Relatórios claros, comunicação proativa e zero surpresas. Você sabe tudo que acontece com sua empresa.</div>
+    </div>
+  </div>
+</section>
+
+<!-- QUOTE -->
+<div class="quote-section">
+  <div class="quote-block">
+    <div class="quote-text">"Cuidamos dos números para que você possa focar no que <em>realmente importa</em> — o crescimento do seu negócio."</div>
+    <div class="quote-author">— Grupo CASE Contabilidade</div>
+  </div>
+  <div class="about-text">
+    <div class="label">Nossa história</div>
+    <h3 class="section-h" style="font-size: clamp(26px,2.8vw,38px);">Mais de uma década construindo <em>confiança.</em></h3>
+    <div class="about-list">
+      <div class="about-item">
+        <div class="about-item-bar"></div>
+        <div class="about-item-text">
+          <strong>Experiência comprovada</strong>
+          Atuamos há mais de 15 anos no mercado, atendendo empresas de diferentes portes e segmentos em todo o Brasil.
         </div>
       </div>
-      <div class="diff-visual">
-        <div class="diff-quote">"Cuidamos dos números para que você possa focar no que <em>realmente importa</em>: o seu negócio."</div>
-        <div class="diff-author">— Grupo CASE Contabilidade</div>
+      <div class="about-item">
+        <div class="about-item-bar"></div>
+        <div class="about-item-text">
+          <strong>Comprometimento com resultados</strong>
+          Nosso sucesso é medido pelo sucesso dos nossos clientes. Cada entrega é feita com precisão e dedicação.
+        </div>
+      </div>
+      <div class="about-item">
+        <div class="about-item-bar"></div>
+        <div class="about-item-text">
+          <strong>Parceria de longo prazo</strong>
+          Não somos apenas um escritório contábil — somos um parceiro estratégico que cresce junto com sua empresa.
+        </div>
       </div>
     </div>
   </div>
-</section>
+</div>
 
-<!-- CTA + CONTATO -->
-<section class="cta-section section" id="contato">
-  <div class="section-tag">Fale com a gente</div>
-  <h2 class="cta-title">Pronto para <em>simplificar</em><br>sua contabilidade?</h2>
-  <p class="cta-sub">Entre em contato e solicite uma proposta personalizada para sua empresa.</p>
-  <div class="contact-grid">
-    <div class="contact-card">
-      <div class="contact-icon">📱</div>
-      <div class="contact-type">WhatsApp</div>
-      <div class="contact-value">(XX) XXXXX-XXXX</div>
-    </div>
-    <div class="contact-card">
-      <div class="contact-icon">✉️</div>
-      <div class="contact-type">E-mail</div>
-      <div class="contact-value">contato@grupocase.com.br</div>
-    </div>
-    <div class="contact-card">
-      <div class="contact-icon">📍</div>
-      <div class="contact-type">Endereço</div>
-      <div class="contact-value">Cidade — Estado</div>
+<!-- CONTATO -->
+<section class="section section-alt" id="contato">
+  <div class="label">Fale conosco</div>
+  <h2 class="section-h" style="margin-bottom:52px;">Vamos conversar sobre<br>o seu <em>negócio.</em></h2>
+  <div class="contact-layout">
+    <form class="contact-form">
+      <div class="form-row">
+        <div class="field">
+          <label>Nome completo</label>
+          <input type="text" placeholder="Seu nome">
+        </div>
+        <div class="field">
+          <label>Empresa</label>
+          <input type="text" placeholder="Nome da empresa">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>WhatsApp</label>
+          <input type="tel" placeholder="(XX) XXXXX-XXXX">
+        </div>
+        <div class="field">
+          <label>E-mail</label>
+          <input type="email" placeholder="seu@email.com">
+        </div>
+      </div>
+      <div class="field">
+        <label>Serviço de interesse</label>
+        <select>
+          <option value="" disabled selected>Selecione um serviço</option>
+          <option>Contabilidade Empresarial</option>
+          <option>Planejamento Tributário</option>
+          <option>Departamento Pessoal</option>
+          <option>Abertura de Empresa</option>
+          <option>Imposto de Renda PF</option>
+          <option>BPO Financeiro</option>
+          <option>Outro</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Mensagem</label>
+        <textarea placeholder="Conte um pouco sobre sua empresa e como podemos ajudar..."></textarea>
+      </div>
+      <button type="submit" class="btn-submit">Enviar Mensagem</button>
+    </form>
+    <div class="contact-info">
+      <div class="ci-item">
+        <div class="ci-icon-wrap">📱</div>
+        <div>
+          <div class="ci-type">WhatsApp</div>
+          <div class="ci-value">(XX) XXXXX-XXXX</div>
+          <div class="ci-note">Atendimento de seg. a sex., 8h às 18h</div>
+        </div>
+      </div>
+      <div class="ci-item">
+        <div class="ci-icon-wrap">✉️</div>
+        <div>
+          <div class="ci-type">E-mail</div>
+          <div class="ci-value">contato@grupocase.com.br</div>
+          <div class="ci-note">Respondemos em até 24 horas úteis</div>
+        </div>
+      </div>
+      <div class="ci-item">
+        <div class="ci-icon-wrap">📍</div>
+        <div>
+          <div class="ci-type">Endereço</div>
+          <div class="ci-value">Rua Exemplo, 123 — Sala 45</div>
+          <div class="ci-note">Cidade — Estado — CEP</div>
+        </div>
+      </div>
+      <div class="ci-item">
+        <div class="ci-icon-wrap">🕐</div>
+        <div>
+          <div class="ci-type">Horário de atendimento</div>
+          <div class="ci-value">Segunda a Sexta</div>
+          <div class="ci-note">08:00 às 18:00</div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-logo">CASE</div>
-  <div class="footer-copy">© 2026 Grupo CASE Contabilidade. Todos os direitos reservados.</div>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a href="#" class="logo">
+        <div class="logo-mark">C</div>
+        <div class="logo-text">
+          <strong>Grupo CASE</strong>
+          <span>Contabilidade & Gestão</span>
+        </div>
+      </a>
+      <p>Soluções contábeis, fiscais e trabalhistas para empresas de todos os portes. Compromisso com precisão, transparência e resultados.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Serviços</h4>
+      <ul>
+        <li><a href="#">Contabilidade</a></li>
+        <li><a href="#">Tributário</a></li>
+        <li><a href="#">Dep. Pessoal</a></li>
+        <li><a href="#">Abertura de Empresa</a></li>
+        <li><a href="#">BPO Financeiro</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Empresa</h4>
+      <ul>
+        <li><a href="#">Sobre nós</a></li>
+        <li><a href="#">Nossa equipe</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Trabalhe conosco</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contato</h4>
+      <ul>
+        <li><a href="#">WhatsApp</a></li>
+        <li><a href="#">E-mail</a></li>
+        <li><a href="#">Localização</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2026 Grupo CASE Contabilidade. Todos os direitos reservados.</div>
+    <div class="footer-crc">CRC — Conselho Regional de Contabilidade</div>
+  </div>
 </footer>
 
 </body>
