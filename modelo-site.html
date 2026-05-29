@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Grupo CASE — Modelo</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold:  #f0c840;
+  --gold2: #d4a217;
+  --gold3: #8a6200;
+  --glow:  rgba(212,162,23,0.20);
+  --gline: rgba(212,162,23,0.32);
+  --bg:    #0d0d0d;
+  --s0:    #141414;
+  --s1:    #1e1e1e;
+  --s2:    #272727;
+  --s3:    #313131;
+  --t1:    #f5f0e3;
+  --t2:    #d8d0b8;
+  --t3:    #b0a882;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--t1); font-family: 'Inter', sans-serif; }
+
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  height: 64px;
+  background: rgba(13,13,13,0.95);
+  border-bottom: 1px solid var(--s3);
+  backdrop-filter: blur(16px);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px;
+}
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.06em;
+}
+.nav-logo span { color: var(--t1); }
+.nav-links { display: flex; gap: 32px; }
+.nav-links a {
+  text-decoration: none; color: var(--t2);
+  font-size: 12px; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  transition: color .2s;
+}
+.nav-links a:hover { color: var(--gold); }
+.nav-cta {
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  color: #000; border: none; padding: 10px 22px;
+  border-radius: 6px; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  cursor: pointer; transition: all .2s;
+}
+.nav-cta:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+/* ── HERO ── */
+.hero {
+  min-height: 88vh;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center;
+  background: radial-gradient(ellipse at 50% 60%, rgba(212,162,23,0.07) 0%, transparent 65%);
+  padding: 80px 24px;
+  position: relative;
+  border-bottom: 1px solid var(--gline);
+}
+.hero-badge {
+  display: inline-block;
+  border: 1px solid var(--gline);
+  color: var(--gold);
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.3em; text-transform: uppercase;
+  padding: 6px 18px; border-radius: 20px;
+  margin-bottom: 28px;
+  background: rgba(212,162,23,0.06);
+}
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(38px, 6vw, 72px);
+  font-weight: 700; line-height: 1.1;
+  color: var(--t1);
+  max-width: 780px;
+}
+.hero h1 em { color: var(--gold); font-style: normal; }
+.hero-sub {
+  margin-top: 20px;
+  font-size: 16px; color: var(--t2); line-height: 1.7;
+  max-width: 520px; margin-left: auto; margin-right: auto;
+}
+.hero-actions { display: flex; gap: 14px; justify-content: center; margin-top: 36px; flex-wrap: wrap; }
+.btn-primary {
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  color: #000; border: none; padding: 14px 32px;
+  border-radius: 6px; font-size: 13px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  cursor: pointer; transition: all .2s;
+  box-shadow: 0 4px 20px var(--glow);
+}
+.btn-primary:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(212,162,23,.4); }
+.btn-outline {
+  background: transparent; color: var(--t1);
+  border: 1px solid var(--s3); padding: 14px 32px;
+  border-radius: 6px; font-size: 13px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  cursor: pointer; transition: all .2s;
+}
+.btn-outline:hover { border-color: var(--gline); color: var(--gold); }
+.hero-divider {
+  position: absolute; bottom: -1px; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold2), transparent);
+}
+
+/* ── NÚMEROS ── */
+.stats {
+  background: var(--s0);
+  border-bottom: 1px solid var(--s3);
+  padding: 48px 24px;
+}
+.stats-inner {
+  max-width: 1000px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: var(--s3);
+  border: 1px solid var(--s3); border-radius: 10px; overflow: hidden;
+}
+.stat {
+  background: var(--s1); padding: 28px 24px; text-align: center;
+}
+.stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 36px; font-weight: 700;
+  color: var(--gold);
+}
+.stat-label { font-size: 11px; color: var(--t3); margin-top: 4px; letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* ── SERVIÇOS ── */
+.section { padding: 80px 24px; }
+.section-inner { max-width: 1000px; margin: 0 auto; }
+.section-tag {
+  display: inline-block;
+  color: var(--gold); font-size: 10px; font-weight: 700;
+  letter-spacing: 0.3em; text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 4vw, 42px); font-weight: 700;
+  color: var(--t1); line-height: 1.2;
+}
+.gold-bar { width: 40px; height: 2px; background: linear-gradient(90deg, var(--gold), var(--gold3)); border-radius: 1px; margin: 16px 0 36px; }
+.services-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+}
+.service-card {
+  background: var(--s1); border: 1px solid var(--s3);
+  border-radius: 10px; padding: 28px 24px;
+  transition: all .2s; position: relative; overflow: hidden;
+}
+.service-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--gold), var(--gold3));
+  opacity: 0; transition: opacity .2s;
+}
+.service-card:hover { border-color: var(--gline); background: var(--s2); transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,.5); }
+.service-card:hover::before { opacity: 1; }
+.service-icon { font-size: 28px; margin-bottom: 16px; }
+.service-name { font-size: 15px; font-weight: 600; color: var(--t1); margin-bottom: 8px; }
+.service-desc { font-size: 12px; color: var(--t2); line-height: 1.6; }
+
+/* ── DIFERENCIAIS ── */
+.diff-section { background: var(--s0); border-top: 1px solid var(--s3); border-bottom: 1px solid var(--s3); }
+.diff-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px; align-items: center;
+}
+.diff-text .section-title { margin-bottom: 24px; }
+.diff-list { display: flex; flex-direction: column; gap: 16px; }
+.diff-item { display: flex; gap: 14px; align-items: flex-start; }
+.diff-dot {
+  width: 8px; height: 8px; background: var(--gold);
+  border-radius: 50%; flex-shrink: 0; margin-top: 5px;
+}
+.diff-item-text { font-size: 13px; color: var(--t2); line-height: 1.6; }
+.diff-item-text strong { color: var(--t1); }
+.diff-visual {
+  background: var(--s1); border: 1px solid var(--gline);
+  border-radius: 12px; padding: 36px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.diff-quote {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px; color: var(--t1); line-height: 1.5;
+}
+.diff-quote em { color: var(--gold); font-style: italic; }
+.diff-author { font-size: 11px; color: var(--t3); letter-spacing: 0.1em; text-transform: uppercase; }
+
+/* ── CTA ── */
+.cta-section {
+  padding: 80px 24px; text-align: center;
+  background: radial-gradient(ellipse at 50% 50%, rgba(212,162,23,0.06) 0%, transparent 60%);
+}
+.cta-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 4vw, 48px); font-weight: 700;
+  color: var(--t1); margin-bottom: 16px;
+}
+.cta-title em { color: var(--gold); font-style: normal; }
+.cta-sub { font-size: 15px; color: var(--t2); margin-bottom: 36px; }
+
+/* ── CONTATO ── */
+.contact-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 800px; margin: 0 auto;
+}
+.contact-card {
+  background: var(--s1); border: 1px solid var(--s3);
+  border-radius: 10px; padding: 24px; text-align: center;
+  transition: border-color .2s;
+}
+.contact-card:hover { border-color: var(--gline); }
+.contact-icon { font-size: 24px; margin-bottom: 10px; }
+.contact-type { font-size: 10px; font-weight: 700; color: var(--gold); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 6px; }
+.contact-value { font-size: 13px; color: var(--t1); }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--s0); border-top: 1px solid var(--s3);
+  padding: 32px 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+}
+.footer-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px; font-weight: 700; color: var(--gold);
+}
+.footer-copy { font-size: 11px; color: var(--t3); }
+
+/* ── RESPONSIVO ── */
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .stats-inner { grid-template-columns: repeat(2, 1fr); }
+  .services-grid { grid-template-columns: 1fr; }
+  .diff-grid { grid-template-columns: 1fr; }
+  .contact-grid { grid-template-columns: 1fr; }
+  footer { flex-direction: column; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">CASE<span> Contabilidade</span></div>
+  <div class="nav-links">
+    <a href="#servicos">Serviços</a>
+    <a href="#diferenciais">Sobre</a>
+    <a href="#contato">Contato</a>
+  </div>
+  <button class="nav-cta">Fale Conosco</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div>
+    <div class="hero-badge">Grupo CASE — Há mais de X anos no mercado</div>
+    <h1>Sua empresa em <em>boas mãos.</em><br>Contabilidade que <em>gera resultado.</em></h1>
+    <p class="hero-sub">Soluções contábeis, fiscais e trabalhistas para empresas de todos os portes. Atendimento personalizado e tecnologia a favor do seu negócio.</p>
+    <div class="hero-actions">
+      <button class="btn-primary">Solicitar Proposta</button>
+      <button class="btn-outline">Conheça nossos serviços</button>
+    </div>
+  </div>
+  <div class="hero-divider"></div>
+</section>
+
+<!-- NÚMEROS -->
+<section class="stats">
+  <div class="stats-inner">
+    <div class="stat">
+      <div class="stat-num">+500</div>
+      <div class="stat-label">Clientes ativos</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">+15</div>
+      <div class="stat-label">Anos de experiência</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">98%</div>
+      <div class="stat-label">Satisfação dos clientes</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">+20</div>
+      <div class="stat-label">Especialistas</div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVIÇOS -->
+<section class="section" id="servicos">
+  <div class="section-inner">
+    <div class="section-tag">O que fazemos</div>
+    <h2 class="section-title">Serviços especializados<br>para o seu negócio</h2>
+    <div class="gold-bar"></div>
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-icon">🏢</div>
+        <div class="service-name">Abertura de Empresas</div>
+        <div class="service-desc">Constituição e registro de empresas com agilidade. MEI, ME, EPP e grandes empresas.</div>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">📊</div>
+        <div class="service-name">Contabilidade Gerencial</div>
+        <div class="service-desc">Relatórios financeiros e gerenciais para apoiar a tomada de decisão do seu negócio.</div>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">💼</div>
+        <div class="service-name">Departamento Pessoal</div>
+        <div class="service-desc">Folha de pagamento, eSocial, admissões, demissões e toda a gestão de RH.</div>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">📋</div>
+        <div class="service-name">Obrigações Fiscais</div>
+        <div class="service-desc">Apuração de impostos, entrega de obrigações acessórias e planejamento tributário.</div>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">💰</div>
+        <div class="service-name">Imposto de Renda PF</div>
+        <div class="service-desc">Declaração de IR para pessoas físicas, com análise para maximizar sua restituição.</div>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">📈</div>
+        <div class="service-name">BPO Financeiro</div>
+        <div class="service-desc">Terceirização do financeiro: contas a pagar, receber, fluxo de caixa e conciliação.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DIFERENCIAIS -->
+<section class="section diff-section" id="diferenciais">
+  <div class="section-inner">
+    <div class="diff-grid">
+      <div class="diff-text">
+        <div class="section-tag">Por que a CASE</div>
+        <h2 class="section-title">Mais do que contabilidade —<br>um parceiro de negócios</h2>
+        <div class="gold-bar"></div>
+        <div class="diff-list">
+          <div class="diff-item">
+            <div class="diff-dot"></div>
+            <div class="diff-item-text"><strong>Atendimento humanizado</strong> — você fala diretamente com seu contador, sem intermediários.</div>
+          </div>
+          <div class="diff-item">
+            <div class="diff-dot"></div>
+            <div class="diff-item-text"><strong>Tecnologia de ponta</strong> — sistemas integrados para agilidade e precisão nas entregas.</div>
+          </div>
+          <div class="diff-item">
+            <div class="diff-dot"></div>
+            <div class="diff-item-text"><strong>Equipe especializada</strong> — profissionais com experiência em múltiplos segmentos e regimes tributários.</div>
+          </div>
+          <div class="diff-item">
+            <div class="diff-dot"></div>
+            <div class="diff-item-text"><strong>Transparência total</strong> — relatórios claros e comunicação proativa sobre prazos e obrigações.</div>
+          </div>
+        </div>
+      </div>
+      <div class="diff-visual">
+        <div class="diff-quote">"Cuidamos dos números para que você possa focar no que <em>realmente importa</em>: o seu negócio."</div>
+        <div class="diff-author">— Grupo CASE Contabilidade</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA + CONTATO -->
+<section class="cta-section section" id="contato">
+  <div class="section-tag">Fale com a gente</div>
+  <h2 class="cta-title">Pronto para <em>simplificar</em><br>sua contabilidade?</h2>
+  <p class="cta-sub">Entre em contato e solicite uma proposta personalizada para sua empresa.</p>
+  <div class="contact-grid">
+    <div class="contact-card">
+      <div class="contact-icon">📱</div>
+      <div class="contact-type">WhatsApp</div>
+      <div class="contact-value">(XX) XXXXX-XXXX</div>
+    </div>
+    <div class="contact-card">
+      <div class="contact-icon">✉️</div>
+      <div class="contact-type">E-mail</div>
+      <div class="contact-value">contato@grupocase.com.br</div>
+    </div>
+    <div class="contact-card">
+      <div class="contact-icon">📍</div>
+      <div class="contact-type">Endereço</div>
+      <div class="contact-value">Cidade — Estado</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">CASE</div>
+  <div class="footer-copy">© 2026 Grupo CASE Contabilidade. Todos os direitos reservados.</div>
+</footer>
+
+</body>
+</html>
