@@ -9,7 +9,8 @@
     "empresa": "node src/index.js --cnpj",
     "instalar-navegador": "playwright install chromium",
     "mapear": "node src/mapear.js",
-    "planilha": "node src/planilha.js"
+    "planilha": "node src/planilha.js",
+    "painel": "node src/painel.js"
   },
   "dependencies": {
     "exceljs": "^4.4.0",

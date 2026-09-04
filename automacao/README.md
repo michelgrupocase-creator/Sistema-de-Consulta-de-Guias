@@ -150,6 +150,30 @@ Com esse relatório, a calibragem sai em uma rodada em vez de três.
 Em `config.json`, mantenha `"headless": false` até funcionar ponta a ponta.
 Você precisa ver onde trava. Só depois mude para `true` e agende.
 
+### O painel
+
+```bash
+npm run planilha     # planilha de controle -> automacao/dados/clientes.json
+npm run painel       # base -> painel/radar-fiscal.html
+```
+
+Gera **um arquivo HTML só**, sem servidor e sem internet: abre com dois cliques
+em qualquer máquina do escritório, inclusive de casa. São seis telas — Painel,
+Clientes, Certidões, Guias, Relatórios e Ajustes — alimentadas apenas pela aba
+**GERAL** da planilha, que é quem define quem é cliente hoje.
+
+O arquivo gerado **não vai para o repositório**: leva CNPJ e situação fiscal de
+112 clientes embutidos. Quem precisar dele roda `npm run painel` na própria
+máquina, a partir da planilha.
+
+> **Ressalva que está impressa na tela de Certidões.** A planilha guarda uma
+> data por certidão e não diz se é a data de **emissão** ou a de **validade**.
+> O painel lê como validade, e por isso quase tudo aparece vencido. Se forem
+> datas de emissão, a leitura correta é outra (uma CND federal vale 180 dias da
+> emissão) e boa parte do vermelho vira verde. É um ajuste de uma linha em
+> `certidao()` — mas ninguém deve decidir nada por essa tela antes de saber
+> qual das duas é.
+
 ---
 
 ## Quando quebrar (e vai quebrar)
