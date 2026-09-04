@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node src/index.js",
     "empresa": "node src/index.js --cnpj",
-    "instalar-navegador": "playwright install chromium"
+    "instalar-navegador": "playwright install chromium",
+    "mapear": "node src/mapear.js"
   },
   "dependencies": {
     "playwright": "^1.49.0"

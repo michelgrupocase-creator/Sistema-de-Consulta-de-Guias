@@ -1,5 +1,12 @@
 # Robô de Relatório de Pendências (e-CAC)
 
+> **Leia antes de tudo — mudança de 09/03/2026.**
+> A Receita aposentou a *Consulta Situação Fiscal* do e-CAC e pôs no lugar o
+> **Minhas Dívidas e Pendências**, no Portal de Serviços, com layout refeito no
+> padrão gov.br. Os seletores deste projeto foram escritos sem acesso ao portal
+> e **precisam ser calibrados contra a tela nova**. Comece por `npm run mapear`
+> (abaixo) — ele descobre o caminho real na sua conta em vez de adivinhar.
+
 Automatiza no navegador o que hoje é feito na mão: entra no e-CAC com o
 certificado do procurador **uma única vez**, e então percorre a lista de
 empresas trocando de perfil e baixando o **Relatório de Situação Fiscal
@@ -90,6 +97,24 @@ relatorios/
 | `esperaEntreEmpresasMs` | intervalo entre empresas (não baixe para 0) |
 | `tentativasPorEmpresa` | quantas vezes reprocessar antes de desistir |
 | `timeoutRelatorioMs` | quanto esperar a Receita montar o PDF |
+
+### Passo obrigatório antes da primeira coleta: `npm run mapear`
+
+```bash
+npm run mapear -- --cnpj 12345678000190
+```
+
+Abre o navegador, percorre as telas **sem baixar nada**, fotografa cada etapa e
+testa todos os candidatos de `src/seletores.js` contra a tela real. No fim
+escreve `relatorios/_debug/mapa.txt` dizendo, seletor por seletor, o que casou e
+o que não casou — e listando os links que existem de verdade no seu portal
+(é assim que se acha o endereço novo de "Minhas Dívidas e Pendências").
+
+Se o login por certificado não for encontrado, ele te dá 90 segundos para entrar
+na mão e continua a partir de onde você parar.
+
+Mande `mapa.txt` e os PNGs de `relatorios/_debug/` para o ajuste dos seletores.
+Com esse relatório, a calibragem sai em uma rodada em vez de três.
 
 ### Primeira execução: deixe visível
 

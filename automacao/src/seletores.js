@@ -33,11 +33,19 @@ export const URLS = {
     'https://cav.receita.fazenda.gov.br',
   ],
 
-  // Serviço "Consulta Pendências - Situação Fiscal" dentro do e-CAC.
-  // Se a Receita mudar a rota, ajuste aqui; o robô tenta esta URL direto
-  // antes de tentar navegar pelos menus.
-  situacaoFiscal:
+  // ATENÇÃO — MUDANÇA DE 09/03/2026:
+  // A Receita aposentou a "Consulta Situação Fiscal" do e-CAC e pôs no lugar
+  // o "Minhas Dívidas e Pendências", no Portal de Serviços, com layout novo
+  // (design system gov.br). As URLs abaixo são tentadas EM ORDEM: primeiro o
+  // serviço novo, depois o antigo, que pode ou não ainda responder.
+  //
+  // Rode `npm run mapear` para descobrir o endereço real na sua conta e
+  // corrigir esta lista — não adianta adivinhar.
+  pendencias: [
+    'https://servicos.receita.fazenda.gov.br/servicos/minhasdividasependencias/',
+    'https://servicos.receita.fazenda.gov.br/servicos/',
     'https://cav.receita.fazenda.gov.br/ecac/Aplicacao.aspx?id=10007&origem=menu',
+  ],
 };
 
 export const SELETORES = {
@@ -96,11 +104,16 @@ export const SELETORES = {
 
   // --- Relatório de situação fiscal --------------------------------------
   menuCertidoes: [
+    'texto=Dívidas e Pendências',
+    'texto=Regularização',
     'texto=Certidões e Situação Fiscal',
     'texto=Certidões e Situação',
   ],
 
   linkConsultaPendencias: [
+    'texto=Minhas Dívidas e Pendências',
+    'texto=Dívidas e Pendências',
+    'texto=Minhas Dívidas',
     'texto=Consulta Pendências - Situação Fiscal',
     'texto=Consulta Pendências',
     'texto=Situação Fiscal',

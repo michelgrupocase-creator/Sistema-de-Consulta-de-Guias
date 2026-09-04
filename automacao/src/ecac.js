@@ -75,18 +75,30 @@ export async function trocarPerfil(page, cnpj) {
   }
 }
 
-/** Abre a tela de "Consulta Pendências - Situação Fiscal". */
+/**
+ * Abre a tela das pendências.
+ *
+ * Desde 09/03/2026 o serviço mudou de lugar (virou "Minhas Dívidas e
+ * Pendências", no Portal de Serviços), então tentamos as URLs conhecidas em
+ * ordem e, se nenhuma servir, caímos na navegação por menu.
+ */
 async function abrirTelaSituacaoFiscal(page) {
-  // Caminho rápido: URL direta do serviço.
-  await page.goto(URLS.situacaoFiscal, { waitUntil: 'domcontentloaded' }).catch(() => {});
+  for (const url of URLS.pendencias) {
+    await page.goto(url, { waitUntil: 'domcontentloaded' }).catch(() => {});
+    if (await existe(page, SELETORES.botaoGerarRelatorio, 3000)) return;
+    if (await existe(page, SELETORES.linkConsultaPendencias, 2000)) {
+      await clicar(page, SELETORES.linkConsultaPendencias, 'link das pendências', {
+        timeoutMs: 10000,
+      });
+      if (await existe(page, SELETORES.botaoGerarRelatorio, 4000)) return;
+    }
+  }
 
-  if (await existe(page, SELETORES.botaoGerarRelatorio, 4000)) return;
-
-  // Caminho lento: navegar pelos menus, caso a URL direta tenha mudado.
-  await clicar(page, SELETORES.menuCertidoes, 'menu "Certidões e Situação Fiscal"', {
+  // Última tentativa: navegar pelos menus a partir de onde estivermos.
+  await clicar(page, SELETORES.menuCertidoes, 'menu de dívidas/certidões', {
     timeoutMs: 15000,
   });
-  await clicar(page, SELETORES.linkConsultaPendencias, 'link "Consulta Pendências"', {
+  await clicar(page, SELETORES.linkConsultaPendencias, 'link das pendências', {
     timeoutMs: 15000,
   });
 }

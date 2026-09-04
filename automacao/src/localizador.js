@@ -76,3 +76,23 @@ export async function clicar(page, candidatos, rotulo, opcoes) {
 export async function existe(page, candidatos, timeoutMs = 2000) {
   return Boolean(await primeiroVisivel(page, candidatos, { timeoutMs }));
 }
+
+/**
+ * Testa TODOS os candidatos de um grupo e diz quais casaram com a tela atual.
+ * Não clica em nada — é só leitura, para o modo de mapeamento.
+ */
+export async function diagnosticar(page, candidatos) {
+  const resultado = [];
+  for (const candidato of candidatos) {
+    let visivel = false;
+    let erro = null;
+    try {
+      const locator = paraLocator(page, candidato);
+      visivel = await locator.isVisible({ timeout: 800 });
+    } catch (e) {
+      erro = e.message.split('\n')[0];
+    }
+    resultado.push({ candidato, visivel, erro });
+  }
+  return resultado;
+}
