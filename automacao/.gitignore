@@ -6,3 +6,7 @@ cert/
 *.p12
 relatorios/
 node_modules/
+
+# Base gerada da planilha de controle — dados de clientes, nunca versionar.
+dados/
+*.xlsx
