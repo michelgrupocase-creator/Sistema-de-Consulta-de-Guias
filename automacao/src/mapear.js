@@ -20,7 +20,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { carregarConfig, obterSenhaCertificado } from './config.js';
+import { carregarConfig, certificadoPadrao, obterSenhaCertificado } from './config.js';
 import { abrirNavegador, salvarDebug } from './navegador.js';
 import { diagnosticar } from './localizador.js';
 import { SELETORES, URLS } from './seletores.js';
@@ -117,16 +117,25 @@ async function main() {
     ? somenteDigitos(process.argv[process.argv.indexOf('--cnpj') + 1] ?? '')
     : null;
 
-  const senha = await obterSenhaCertificado(config);
+  const nomeCert = process.argv.includes('--certificado')
+    ? process.argv[process.argv.indexOf('--certificado') + 1]
+    : certificadoPadrao(config);
+
+  const senha = await obterSenhaCertificado(config, nomeCert);
   const pastaSaida = path.resolve(RAIZ, config.saida);
 
   // Mapeamento é sempre com a tela visível: você precisa ver o que acontece.
-  const { browser, page } = await abrirNavegador({ ...config, headless: false }, senha);
+  const { browser, page } = await abrirNavegador(
+    { ...config, headless: false },
+    config.certificados[nomeCert],
+    senha
+  );
 
   titulo('MAPEAMENTO DO PORTAL — ' + new Date().toLocaleString('pt-BR'));
   escrever('Este relatório diz quais seletores ainda valem. Mande-o inteiro,');
   escrever('junto com os prints de relatorios/_debug/, para o ajuste.');
   escrever('');
+  escrever(`Certificado:   ${nomeCert}`);
   escrever(`CNPJ de teste: ${alvo ? formatarCnpj(alvo) : '(nenhum — só as telas públicas)'}`);
 
   try {

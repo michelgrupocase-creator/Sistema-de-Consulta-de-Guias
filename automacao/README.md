@@ -27,6 +27,9 @@ Três coisas que decidem se isso vai funcionar para você:
    CPF/CNPJ do procurador, incluindo o serviço de situação fiscal. Sem
    procuração, nem robô nem API funcionam. Esse costuma ser o gargalo real do
    projeto, não o código.
+   Na prática a carteira vem dividida: parte das procurações foi outorgada ao
+   **e-CNPJ do escritório** e parte ao **e-CPF do responsável**. O robô lida com
+   isso nativamente — veja "Dois (ou mais) certificados" abaixo.
 3. **Isto é automação de navegador, não API oficial.** Quebra quando a Receita
    muda o layout, e opera fora dos termos de uso do portal. Quando quebrar, o
    conserto está concentrado em um único arquivo: `src/seletores.js`.
@@ -46,8 +49,36 @@ npx playwright install chromium
 ```bash
 cp config.example.json config.json
 cp empresas.example.json empresas.json
-mkdir -p cert          # coloque aqui o seu certificado .pfx
+mkdir -p cert          # coloque aqui os seus arquivos .pfx
 ```
+
+### Dois (ou mais) certificados
+
+Declare cada certificado com um apelido em `config.json`:
+
+```json
+"certificados": {
+  "escritorio":  { "pfxPath": "./cert/ecnpj-escritorio.pfx",  "senhaEnv": "ECAC_CERT_ESCRITORIO" },
+  "responsavel": { "pfxPath": "./cert/ecpf-responsavel.pfx", "senhaEnv": "ECAC_CERT_RESPONSAVEL" }
+},
+"certificadoPadrao": "escritorio"
+```
+
+E diga, por empresa, sob qual procuração ela está:
+
+```json
+[
+  { "cnpj": "12.345.678/0001-90", "apelido": "Padaria do Zé",  "certificado": "escritorio" },
+  { "cnpj": "98.765.432/0001-10", "apelido": "Posto Canaã",    "certificado": "responsavel" },
+  { "cnpj": "11.222.333/0001-44", "apelido": "Usa o padrão" }
+]
+```
+
+O robô **agrupa a carteira por certificado e abre uma sessão para cada um** —
+não dá para trocar o certificado de uma conexão já aberta. Se um certificado
+falhar (arquivo errado, senha errada, vencido), só o grupo dele é marcado como
+falha; os outros rodam normalmente. O `_execucao.json` registra qual certificado
+atendeu cada empresa.
 
 Edite `empresas.json` com a sua carteira de clientes (CNPJ com ou sem
 pontuação — o robô normaliza):
@@ -62,9 +93,13 @@ A **senha do certificado nunca vai para arquivo**. Ou você exporta a variável
 de ambiente, ou o robô pergunta na hora (digitação oculta):
 
 ```bash
-export ECAC_CERT_SENHA='sua-senha'     # Linux/macOS
-setx ECAC_CERT_SENHA "sua-senha"       # Windows (reabra o terminal)
+export ECAC_CERT_ESCRITORIO='senha-1'      # Linux/macOS
+export ECAC_CERT_RESPONSAVEL='senha-2'
+setx ECAC_CERT_ESCRITORIO "senha-1"        # Windows (reabra o terminal)
 ```
+
+Todas as senhas são pedidas **antes** de abrir qualquer navegador: numa execução
+agendada de madrugada, travar pedindo senha na terceira hora é o pior desfecho.
 
 ## Uso
 
@@ -89,8 +124,8 @@ relatorios/
 
 | Campo | Para que serve |
 |---|---|
-| `certificado.pfxPath` | caminho do `.pfx` do procurador |
-| `certificado.senhaEnv` | nome da variável de ambiente com a senha |
+| `certificados` | mapa apelido → `{ pfxPath, senhaEnv }` |
+| `certificadoPadrao` | usado por empresa que não declara `certificado` |
 | `saida` | pasta onde os PDFs são gravados |
 | `headless` | `false` mostra o navegador; `true` roda invisível |
 | `navegadorPath` | opcional: usar um Chromium já instalado na máquina |
@@ -102,6 +137,7 @@ relatorios/
 
 ```bash
 npm run mapear -- --cnpj 12345678000190
+npm run mapear -- --certificado responsavel --cnpj 98765432000110
 ```
 
 Abre o navegador, percorre as telas **sem baixar nada**, fotografa cada etapa e

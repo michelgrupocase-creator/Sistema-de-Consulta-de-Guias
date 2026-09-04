@@ -1,8 +1,15 @@
 {
-  "certificado": {
-    "pfxPath": "./cert/certificado.pfx",
-    "senhaEnv": "ECAC_CERT_SENHA"
+  "certificados": {
+    "escritorio": {
+      "pfxPath": "./cert/ecnpj-escritorio.pfx",
+      "senhaEnv": "ECAC_CERT_ESCRITORIO"
+    },
+    "responsavel": {
+      "pfxPath": "./cert/ecpf-responsavel.pfx",
+      "senhaEnv": "ECAC_CERT_RESPONSAVEL"
+    }
   },
+  "certificadoPadrao": "escritorio",
   "saida": "./relatorios",
   "headless": false,
   "navegadorPath": "",

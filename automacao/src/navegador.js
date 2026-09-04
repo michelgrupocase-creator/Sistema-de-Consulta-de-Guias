@@ -11,15 +11,15 @@ import { URLS } from './seletores.js';
  * IMPORTANTE: só funciona com certificado A1 (arquivo .pfx/.p12). Certificado
  * A3 (token USB ou cartão) exige PIN a cada uso e não roda desassistido.
  */
-export async function abrirNavegador(config, senhaCertificado) {
-  const pfxPath = path.resolve(config.certificado.pfxPath);
+export async function abrirNavegador(config, certificado, senhaCertificado) {
+  const pfxPath = path.resolve(certificado.pfxPath);
 
   try {
     await fs.access(pfxPath);
   } catch {
     throw new Error(
       `Certificado não encontrado em "${pfxPath}". ` +
-        `Ajuste "certificado.pfxPath" no config.json.`
+        `Ajuste o "pfxPath" desse certificado no config.json.`
     );
   }
 
