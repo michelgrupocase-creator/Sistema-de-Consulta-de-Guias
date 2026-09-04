@@ -80,14 +80,7 @@ falhar (arquivo errado, senha errada, vencido), só o grupo dele é marcado como
 falha; os outros rodam normalmente. O `_execucao.json` registra qual certificado
 atendeu cada empresa.
 
-Edite `empresas.json` com a sua carteira de clientes (CNPJ com ou sem
-pontuação — o robô normaliza):
-
-```json
-[
-  { "cnpj": "12.345.678/0001-90", "apelido": "Padaria do Zé" }
-]
-```
+O CNPJ pode ir com ou sem pontuação — o robô normaliza.
 
 A **senha do certificado nunca vai para arquivo**. Ou você exporta a variável
 de ambiente, ou o robô pergunta na hora (digitação oculta):
