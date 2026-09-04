@@ -1,0 +1,13 @@
+{
+  "certificado": {
+    "pfxPath": "./cert/certificado.pfx",
+    "senhaEnv": "ECAC_CERT_SENHA"
+  },
+  "saida": "./relatorios",
+  "headless": false,
+  "navegadorPath": "",
+  "esperaEntreEmpresasMs": 4000,
+  "tentativasPorEmpresa": 2,
+  "timeoutPadraoMs": 60000,
+  "timeoutRelatorioMs": 240000
+}

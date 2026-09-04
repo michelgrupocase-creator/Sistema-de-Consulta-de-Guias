@@ -1,0 +1,145 @@
+# Robô de Relatório de Pendências (e-CAC)
+
+Automatiza no navegador o que hoje é feito na mão: entra no e-CAC com o
+certificado do procurador **uma única vez**, e então percorre a lista de
+empresas trocando de perfil e baixando o **Relatório de Situação Fiscal
+(pendências)** de cada CNPJ em PDF.
+
+Roda **na sua máquina**, sem custo por consulta.
+
+---
+
+## Antes de começar: leia isto
+
+Três coisas que decidem se isso vai funcionar para você:
+
+1. **Só funciona com certificado A1** (arquivo `.pfx` / `.p12`). Certificado
+   **A3** (token USB ou cartão) pede PIN a cada operação e **não roda
+   desassistido** — não há contorno honesto para isso.
+2. **Cada empresa precisa de procuração eletrônica válida** no e-CAC para o
+   CPF/CNPJ do procurador, incluindo o serviço de situação fiscal. Sem
+   procuração, nem robô nem API funcionam. Esse costuma ser o gargalo real do
+   projeto, não o código.
+3. **Isto é automação de navegador, não API oficial.** Quebra quando a Receita
+   muda o layout, e opera fora dos termos de uso do portal. Quando quebrar, o
+   conserto está concentrado em um único arquivo: `src/seletores.js`.
+
+---
+
+## Instalação
+
+```bash
+cd automacao
+npm install
+npx playwright install chromium
+```
+
+## Configuração
+
+```bash
+cp config.example.json config.json
+cp empresas.example.json empresas.json
+mkdir -p cert          # coloque aqui o seu certificado .pfx
+```
+
+Edite `empresas.json` com a sua carteira de clientes (CNPJ com ou sem
+pontuação — o robô normaliza):
+
+```json
+[
+  { "cnpj": "12.345.678/0001-90", "apelido": "Padaria do Zé" }
+]
+```
+
+A **senha do certificado nunca vai para arquivo**. Ou você exporta a variável
+de ambiente, ou o robô pergunta na hora (digitação oculta):
+
+```bash
+export ECAC_CERT_SENHA='sua-senha'     # Linux/macOS
+setx ECAC_CERT_SENHA "sua-senha"       # Windows (reabra o terminal)
+```
+
+## Uso
+
+```bash
+npm start                       # todas as empresas de empresas.json
+npm start -- --cnpj 12345678000190   # só uma empresa (ideal para testar)
+```
+
+Saída:
+
+```
+relatorios/
+  2026-09-04/
+    12345678000190_Padaria-do-Ze.pdf
+    _execucao.json          <- o que deu certo, o que falhou e por quê
+  _debug/
+    2026-09-04T...png       <- print da tela no momento de cada falha
+    2026-09-04T...html
+```
+
+### Opções do `config.json`
+
+| Campo | Para que serve |
+|---|---|
+| `certificado.pfxPath` | caminho do `.pfx` do procurador |
+| `certificado.senhaEnv` | nome da variável de ambiente com a senha |
+| `saida` | pasta onde os PDFs são gravados |
+| `headless` | `false` mostra o navegador; `true` roda invisível |
+| `navegadorPath` | opcional: usar um Chromium já instalado na máquina |
+| `esperaEntreEmpresasMs` | intervalo entre empresas (não baixe para 0) |
+| `tentativasPorEmpresa` | quantas vezes reprocessar antes de desistir |
+| `timeoutRelatorioMs` | quanto esperar a Receita montar o PDF |
+
+### Primeira execução: deixe visível
+
+Em `config.json`, mantenha `"headless": false` até funcionar ponta a ponta.
+Você precisa ver onde trava. Só depois mude para `true` e agende.
+
+---
+
+## Quando quebrar (e vai quebrar)
+
+O robô não morre em silêncio. Quando não encontra um elemento, ele:
+
+1. salva **print + HTML** da tela em `relatorios/_debug/`;
+2. diz **qual seletor** falhou, pelo nome usado em `src/seletores.js`;
+3. **pula a empresa** e continua as demais, em vez de derrubar a execução.
+
+Para consertar: abra `src/seletores.js`, ache o campo citado no erro e
+acrescente um candidato novo à lista. Cada campo é uma lista tentada em ordem,
+então **adicionar não quebra o que já funcionava**.
+
+Formatos aceitos:
+
+| Formato | Exemplo | Quando usar |
+|---|---|---|
+| `css=` | `css=#btnConsultar` | seletor copiado do DevTools |
+| `texto=` | `texto=Consultar` | texto visível na tela |
+| `papel=` | `papel=button\|Emitir` | botão/link por nome acessível |
+| `label=` | `label=CNPJ` | campo de formulário pelo rótulo |
+
+---
+
+## O que ainda não faz (e onde está o valor de verdade)
+
+Hoje isto **baixa PDFs**. Baixar PDF não é produto: você trocou o trabalho
+manual de baixar pelo trabalho manual de ler 200 arquivos.
+
+O próximo passo — e o que realmente justifica o projeto — é **extrair as
+pendências do PDF, guardar no banco e comparar com a execução anterior**, para
+o sistema avisar apenas o que mudou:
+
+> "Padaria do Zé ganhou uma pendência de DCTFWeb 08/2026 que não existia na
+> semana passada."
+
+Isso é vigilância fiscal, e é o que se vende. O resto é armazenamento.
+
+---
+
+## Segurança
+
+O `.gitignore` desta pasta bloqueia `config.json`, `empresas.json`, `cert/`,
+`*.pfx` e `relatorios/`. **Não remova essas linhas.** Certificado, senha e
+relatórios de pendências de terceiros são dados sob sigilo fiscal — commitar
+qualquer um deles é incidente, não deslize.

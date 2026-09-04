@@ -1,0 +1,8 @@
+# Nada abaixo pode ir para o repositório.
+config.json
+empresas.json
+cert/
+*.pfx
+*.p12
+relatorios/
+node_modules/

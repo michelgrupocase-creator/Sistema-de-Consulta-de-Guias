@@ -1,0 +1,18 @@
+{
+  "name": "ecac-pendencias",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Robo local que acessa o e-CAC com certificado do procurador, troca de empresa e baixa o Relatorio de Situacao Fiscal (pendencias) de cada CNPJ.",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "empresa": "node src/index.js --cnpj",
+    "instalar-navegador": "playwright install chromium"
+  },
+  "dependencies": {
+    "playwright": "^1.49.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
