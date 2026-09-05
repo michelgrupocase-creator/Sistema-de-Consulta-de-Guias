@@ -1,771 +1,589 @@
 <title>Radar Fiscal CASE</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Saira+Condensed:wght@600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap">
 
 <style>
   /* ==========================================================
-     Radar Fiscal — aplicação de trabalho.
-     Sem serifa: fonte de display não pertence a uma tela
-     operacional. Barlow em tudo, Saira Condensed só nos
-     rótulos em caixa alta (marca Grupo Case).
-     A tela ocupa a janela; cada coluna rola por conta própria.
+     Radar Fiscal CASE — sistema de cadastro e acompanhamento
+     fiscal da carteira do escritório.
+
+     Regras de tela que valem em todo o arquivo:
+     · Caixa alta só em rótulo de seção (10px). Dado de cliente
+       nunca grita: nome, cidade e regime vão em Capitulado.
+     · Ouro é acento, não cor de texto. Ele marca o item ativo,
+       o botão primário e a marca — nada além disso.
+     · Uma linha por cliente. Densidade é o que faz uma tela
+       operacional servir para trabalhar em vez de rolar.
      ========================================================== */
   :root {
     --logo: url("__LOGO_URI__");
 
-    --preto:      #131415;
-    --preto-3:    #2A2B2C;
-    --papel:      #F4EFE4;
-    --papel-2:    #FBF8F1;
-    --papel-3:    #EAE4D5;
-    --texto:      #22211C;
-    --texto-2:    #575249;
-    --texto-3:    #8A8478;
-    --linha:      #D6CCB8;
-    --linha-2:    #E6DFCE;
+    --tinta:      #17181A;
+    --tinta-2:    #24262A;
+    --fundo:      #F1F0EC;
+    --carta:      #FFFFFF;
+    --carta-2:    #FAF9F6;
+    --linha:      #E3E0D8;
+    --linha-2:    #EFEDE7;
+
+    --texto:      #1B1C1A;
+    --texto-2:    #63615A;
+    --texto-3:    #94918A;
 
     --ouro:       #A97C1C;
-    --ouro-faixa: #C9A24A;
-    --ouro-vivo:  #F0B020;
-    --ouro-claro: #F8D030;
+    --ouro-2:     #C9A24A;
+    --ouro-viva:  #F0B020;
 
-    /* O ouro da marca ocupa a faixa do amarelo, então não existe
-       "amarelo de alerta" aqui. Pendência conhecida é linha de
-       base, fica neutra; vermelho só para o que surgiu agora. */
-    --limpo:     #3F7A34;  --limpo-bg:  #E7EEDF;  --limpo-ink:  #2C5A25;
-    --nova:      #B3372F;  --nova-bg:   #F6E3E0;  --nova-ink:   #8E2A24;
-    --falha:     #E08818;  --falha-bg:  #F9EBD6;  --falha-ink:  #8A5210;
-    --neutro-bg: #EAE4D5;  --neutro-ink:#575249;
+    --limpo:     #3F7A34;  --limpo-bg:  #EAF1E4;  --limpo-ink:  #2C5A25;
+    --nova:      #B3372F;  --nova-bg:   #F9E6E3;  --nova-ink:   #8E2A24;
+    --falha:     #D08010;  --falha-bg:  #FBEEDA;  --falha-ink:  #85500E;
+    --neutro-bg: #EFEDE7;  --neutro-ink:#63615A;
 
-    --sc: "Saira Condensed", "Arial Narrow", sans-serif;
     --bl: Barlow, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
     --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-    --r: 5px;
+    --r: 8px;
+    --sombra: 0 1px 2px rgba(20, 20, 18, .05), 0 1px 8px rgba(20, 20, 18, .03);
   }
 
   * { box-sizing: border-box; }
 
   body {
     margin: 0;
-    background: var(--papel);
+    background: var(--fundo);
     color: var(--texto);
     font-family: var(--bl);
     font-size: 13px;
-    line-height: 1.4;
+    line-height: 1.45;
     -webkit-font-smoothing: antialiased;
   }
 
-  h1, h2 { margin: 0; }
-  .num { font-variant-numeric: tabular-nums; }
-  :focus-visible { outline: 2px solid var(--ouro); outline-offset: 1px; }
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  h1, h2, h3 { margin: 0; font-weight: 600; }
+  button { font-family: inherit; }
 
-  /* Rótulo em caixa alta — o traço da marca dentro da interface. */
-  .rot-alto {
-    font-family: var(--sc);
+  /* Rótulo de seção. É o único lugar com caixa alta. */
+  .eyebrow {
+    font-size: 10px;
     font-weight: 600;
     letter-spacing: .1em;
     text-transform: uppercase;
+    color: var(--texto-3);
   }
 
-  /* ---------- Casca: ocupa a janela, não cresce sem fim ---------- */
+  /* ---------- Esqueleto ---------- */
   .app { display: flex; height: 100vh; overflow: hidden; }
 
-  /* ---------- Trilho ---------- */
   .trilho {
-    width: 68px;
+    width: 112px;
     flex: none;
-    background: var(--preto);
+    background: var(--tinta);
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
+    padding: 14px 10px;
     gap: 2px;
-    padding: 10px 5px 12px;
-    overflow-y: auto;
   }
 
   .marca-simbolo {
-    width: 32px; height: 32px;
-    background-image: var(--logo);
-    background-size: auto 100%;
-    background-position: left center;
-    background-repeat: no-repeat;
-    margin-bottom: 10px;
-    flex: none;
+    height: 34px;
+    margin: 2px 4px 14px;
+    background: var(--logo) no-repeat left center / contain;
   }
 
+  /* Item de menu: largura toda, rótulo com espaço para caber.
+     O trilho antigo cortava "Relatórios" e "Certidões" no meio. */
   .item {
-    width: 100%;
-    padding: 7px 2px 5px;
-    border: 0;
-    background: transparent;
-    color: #948E82;
-    font-family: var(--sc);
-    font-size: 9.5px;
-    font-weight: 600;
-    letter-spacing: .07em;
-    text-transform: uppercase;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 3px;
+    gap: 9px;
+    width: 100%;
+    padding: 8px 9px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: #9A968C;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: left;
     cursor: pointer;
-    border-radius: var(--r);
-    line-height: 1.1;
+    transition: background .12s, color .12s;
   }
+  .item svg { width: 16px; height: 16px; flex: none; }
+  .item:hover { background: rgba(255, 255, 255, .06); color: #D8D4C9; }
+  .item[aria-current="page"] { background: rgba(240, 176, 32, .13); color: var(--ouro-viva); }
 
-  .item svg { width: 18px; height: 18px; }
-  .item:hover { color: var(--papel-2); background: var(--preto-3); }
-
-  .item[aria-current="page"] {
-    color: var(--ouro-claro);
-    background: var(--preto-3);
-    box-shadow: inset 2px 0 0 var(--ouro-vivo);
-  }
+  .trilho .rodape-trilho { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }
 
   .avatar {
-    margin-top: auto;
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    background: var(--ouro-faixa);
-    color: var(--preto);
-    font-family: var(--sc);
-    font-weight: 700;
-    font-size: 12px;
-    display: grid;
-    place-items: center;
-    flex: none;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--ouro-viva); color: var(--tinta);
+    display: grid; place-items: center;
+    font-size: 11px; font-weight: 700;
   }
 
-  /* ---------- Coluna principal ---------- */
   .principal { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; }
 
   /* ---------- Topo ---------- */
   .topo {
     flex: none;
-    background: var(--papel-2);
-    border-bottom: 1px solid var(--linha);
-    padding: 7px 14px;
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 6px 12px;
+    gap: 12px;
+    padding: 10px 16px;
+    background: var(--carta);
+    border-bottom: 1px solid var(--linha);
   }
 
   .busca {
-    flex: 1 1 220px;
-    max-width: 340px;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    background: var(--papel);
+    display: flex; align-items: center; gap: 7px;
+    flex: 1 1 340px; max-width: 420px; min-width: 200px;
+    padding: 7px 11px;
+    background: var(--fundo);
     border: 1px solid var(--linha);
-    border-radius: 999px;
-    padding: 5px 12px;
+    border-radius: 7px;
   }
-
+  .busca:focus-within { border-color: var(--ouro-2); background: var(--carta); }
   .busca svg { width: 14px; height: 14px; color: var(--texto-3); flex: none; }
-
   .busca input {
-    border: 0; background: transparent; font: inherit;
-    color: var(--texto); width: 100%; outline: none;
+    flex: 1; min-width: 0; border: 0; background: none; outline: none;
+    font: inherit; color: var(--texto);
   }
-
   .busca input::placeholder { color: var(--texto-3); }
 
-  .acoes { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
+  .acoes { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
 
   .acao {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 9px;
-    border: 0;
-    background: transparent;
-    border-radius: var(--r);
-    font-family: var(--sc);
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: .07em;
-    text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 10px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: none;
     color: var(--texto-2);
+    font-size: 12px; font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .acao:hover { background: var(--fundo); color: var(--texto); }
+  .acao[aria-pressed="true"] { background: var(--tinta); color: #fff; }
+  .acao .qtd { font-size: 11px; opacity: .75; font-variant-numeric: tabular-nums; }
+
+  .estado-topo {
+    margin-left: auto; display: flex; align-items: center; gap: 6px;
+    font-size: 11.5px; color: var(--texto-2); white-space: nowrap;
+  }
+  .pulso { width: 6px; height: 6px; border-radius: 50%; background: var(--limpo); }
+  .pulso.frio { background: var(--texto-3); }
+
+  /* ---------- Botões ---------- */
+  .botao {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid var(--tinta);
+    border-radius: 6px;
+    background: var(--tinta);
+    color: #fff;
+    font-size: 12px; font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .botao:hover { background: var(--tinta-2); }
+  .botao svg { width: 13px; height: 13px; }
+  .botao.vazado { background: none; color: var(--texto); border-color: var(--linha); }
+  .botao.vazado:hover { background: var(--fundo); }
+  .botao.perigo { background: none; color: var(--nova-ink); border-color: var(--nova-bg); }
+  .botao.perigo:hover { background: var(--nova-bg); }
+  .botao[disabled] { opacity: .45; cursor: not-allowed; }
+
+  /* ---------- Vistas ---------- */
+  .vista { display: none; }
+  .vista[data-ativa] { display: grid; }
+  .conteudo {
+    flex: 1; min-height: 0;
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 400px);
+    gap: 12px; padding: 12px 16px;
+  }
+  .vista-unica { grid-template-columns: minmax(0, 1fr); }
+  .coluna { display: flex; flex-direction: column; gap: 12px; min-width: 0; min-height: 0; overflow-y: auto; }
+
+  /* ---------- Barras de rolagem ----------
+     A barra grossa do sistema roubava espaço e aparecia duplicada:
+     a coluna rolava por fora enquanto o cartão rolava por dentro.
+     Aqui ela é fina, discreta e some quando não há o que rolar. */
+  .coluna, .rolagem, .modal-corpo {
+    scrollbar-width: thin;
+    scrollbar-color: var(--linha) transparent;
+    overscroll-behavior: contain;
+  }
+  .coluna::-webkit-scrollbar,
+  .rolagem::-webkit-scrollbar,
+  .modal-corpo::-webkit-scrollbar { width: 9px; height: 9px; }
+
+  .coluna::-webkit-scrollbar-track,
+  .rolagem::-webkit-scrollbar-track,
+  .modal-corpo::-webkit-scrollbar-track { background: transparent; }
+
+  .coluna::-webkit-scrollbar-thumb,
+  .rolagem::-webkit-scrollbar-thumb,
+  .modal-corpo::-webkit-scrollbar-thumb {
+    background: var(--linha);
+    border-radius: 20px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  .coluna:hover::-webkit-scrollbar-thumb,
+  .rolagem:hover::-webkit-scrollbar-thumb,
+  .modal-corpo:hover::-webkit-scrollbar-thumb { background: #C9C5BA; background-clip: content-box; }
+  .coluna::-webkit-scrollbar-corner,
+  .rolagem::-webkit-scrollbar-corner { background: transparent; }
+
+  /* Uma rolagem por coluna. A coluna que tem um cartão só (a ficha)
+     não rola: quem rola é o miolo do cartão, sob o cabeçalho fixo. */
+  .coluna.fixa { overflow: hidden; }
+
+  /* ---------- Cartão ---------- */
+  .cartao {
+    background: var(--carta);
+    border: 1px solid var(--linha);
+    border-radius: var(--r);
+    box-shadow: var(--sombra);
+    min-height: 0;
+    display: flex; flex-direction: column;
+  }
+  .cartao.cresce { flex: 1; }
+
+  .cartao-topo {
+    flex: none;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--linha-2);
+  }
+  .cartao-topo h2 { font-size: 13.5px; }
+  .cartao-topo .dica { font-size: 11.5px; color: var(--texto-3); }
+
+  .cartao-corpo { padding: 12px 14px; }
+  .cartao-pe {
+    margin-top: auto; flex: none;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 10px 14px;
+    border-top: 1px solid var(--linha-2);
+    background: var(--carta-2);
+    border-radius: 0 0 var(--r) var(--r);
+  }
+  .cartao-pe .origem { font-size: 11px; color: var(--texto-3); }
+
+  /* ---------- Tudo clicável ----------
+     Contador, barra e selo são botões: cada número leva à lista que
+     ele conta. Eles não podem parecer botão de formulário, então
+     herdam o visual do texto e só reagem ao passar o mouse. */
+  .contador, .medida, .elo, .elo-n, .clicavel {
+    font: inherit; color: inherit; text-align: left;
+    border: 0; background: none; padding: 0; margin: 0;
     cursor: pointer;
   }
 
-  .acao svg { width: 14px; height: 14px; }
-
-  .acao .qtd {
-    font-family: var(--bl);
-    font-weight: 600;
-    font-size: 11.5px;
-    letter-spacing: 0;
-    opacity: .7;
+  .contador {
+    display: flex; align-items: baseline; gap: 9px; width: 100%;
+    padding: 3px 5px; margin: -3px -5px; border-radius: 5px;
   }
-  .acao:hover { background: var(--papel-3); color: var(--texto); }
-  .acao[aria-pressed="true"] { background: var(--preto); color: var(--ouro-claro); }
+  .contador:hover { background: var(--fundo); }
+  .contador:focus-visible, .medida:focus-visible, .elo:focus-visible,
+  .elo-n:focus-visible, .clicavel:focus-visible {
+    outline: 2px solid var(--ouro-2); outline-offset: 2px; border-radius: 4px;
+  }
 
-  .divisor { width: 1px; height: 18px; background: var(--linha); }
+  .medida { display: block; width: 100%; padding: 3px 5px; margin: 0 -5px; border-radius: 5px; }
+  .medida + .medida { margin-top: 5px; }
+  .medida:hover { background: var(--fundo); }
+  .trilha { display: block; }
+  .leg { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: 4px; }
 
-  .estado-topo {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-size: 12px;
+  /* Link de dado: nome de responsável, cidade, regime, CNPJ. */
+  .elo {
     color: var(--texto-2);
-    white-space: nowrap;
+    border-bottom: 1px solid transparent;
+    max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
+  .elo:hover { color: var(--ouro); border-bottom-color: var(--ouro-2); }
+  .elo.mono { font-family: var(--mono); font-size: 12px; }
+  .elo-n:hover { text-decoration: underline; }
+  .clicavel:hover { filter: brightness(.95); }
 
-  .estado-topo b { font-weight: 600; color: var(--texto); font-variant-numeric: tabular-nums; }
-  .pulso { width: 7px; height: 7px; border-radius: 50%; background: var(--limpo); flex: none; }
-
-  /* ---------- Conteúdo: 3 colunas que rolam sozinhas ---------- */
-  .conteudo {
-    flex: 1;
-    min-height: 0;
-    display: grid;
-    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, .85fr);
-    gap: 12px;
-    padding: 12px;
+  /* Filtro vindo de um contador não acende botão na barra; esta marca
+     diz por que a lista encolheu, e permite desfazer. */
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 6px 4px 10px; border-radius: 20px;
+    background: var(--tinta); color: #fff;
+    font-size: 11.5px; font-weight: 600; white-space: nowrap;
   }
-
-  .coluna {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    min-width: 0;
-    min-height: 0;
-    overflow-y: auto;
-    padding-right: 2px;
+  .chip button {
+    border: 0; background: rgba(255,255,255,.16); color: #fff;
+    width: 16px; height: 16px; border-radius: 50%;
+    display: grid; place-items: center; cursor: pointer; padding: 0;
   }
+  .chip button:hover { background: rgba(255,255,255,.32); }
+  .chip svg { width: 9px; height: 9px; }
 
-  /* Cada item do menu abre uma vista; só uma fica visível por vez. */
-  .vista { display: none; }
-  .vista[data-ativa] { display: grid; }
+  .campos { margin-top: 8px; }
 
-  .vista-larga { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); }
-  .vista-unica { grid-template-columns: minmax(0, 1fr); }
+  .grade-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
 
-  .cartao { background: var(--papel-2); border: 1px solid var(--linha); border-radius: var(--r); }
-
-  /* Tela ainda não construída — diz o que será, sem fingir que existe. */
-  .placa {
-    grid-column: 1 / -1;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    align-items: flex-start;
-    background: var(--papel-2);
-    border: 1px dashed var(--linha);
-    border-radius: var(--r);
-    padding: 26px 24px;
-    max-width: 72ch;
-  }
-
-  .placa h3 {
-    margin: 0;
-    font-family: var(--sc);
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-  }
-
-  .placa p { margin: 0; color: var(--texto-2); font-size: 13px; }
-  .placa ul { margin: 2px 0 0; padding-left: 18px; color: var(--texto-2); font-size: 13px; }
-  .placa li { margin-bottom: 3px; }
-
-  /* Aviso: o dado por trás desta tela é ambíguo. Ocupa pouco, mas não some. */
-  .placa-duvida {
-    border-style: solid;
-    border-color: var(--falha);
-    background: var(--falha-bg);
-    max-width: none;
-    padding: 14px 18px;
-    display: grid;
-    grid-template-columns: minmax(0, 22ch) minmax(0, 1fr) minmax(0, 1fr);
-    align-items: start;
-    gap: 8px 20px;
-  }
-  .placa-duvida h3 { color: var(--falha-ink); font-size: 12.5px; line-height: 1.35; }
-  .placa-duvida p { color: var(--falha-ink); opacity: .92; }
-  @media (max-width: 1100px) {
-    .placa-duvida { grid-template-columns: minmax(0, 1fr); }
-  }
-
-  /* Ficha do cliente: seções separadas por filete, não por espaço vazio. */
-  .secao + .secao { border-top: 1px solid var(--linha); }
-  .secao .sub-rot { margin-top: 0; }
-
-  /* Campo em branco tem que parecer em branco, não parecer zero. */
-  .nulo { color: var(--texto-3, var(--texto-2)); opacity: .65; font-style: italic; }
-
-  /* Listas operacionais do Relatórios: número, o que é, e o botão que copia. */
-  .listas { display: flex; flex-direction: column; gap: 6px; }
-  .lista {
-    display: grid;
-    grid-template-columns: 3.2ch minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 10px;
-  }
-  .lista .n { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; }
-  .lista .rot { font-size: 12px; color: var(--texto-2); }
-  .lista .botao { padding: 3px 9px; font-size: 10.5px; }
-
-  .grade-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
-
-  /* Matriz de certidões: uma coluna por órgão. */
-  .celula-cert { white-space: nowrap; font-size: 11.5px; }
-
-  .marca-cert {
-    display: inline-block;
-    padding: 1px 6px;
-    border-radius: 3px;
-    font-family: var(--sc);
-    font-weight: 600;
-    font-size: 11px;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-  }
-
-  .marca-cert.valida   { background: var(--limpo-bg);  color: var(--limpo-ink); }
-  .marca-cert.vencida  { background: var(--neutro-bg); color: var(--neutro-ink); }
-  .marca-cert.impedida { background: var(--falha-bg);  color: var(--falha-ink); }
-  .marca-cert.vazio    { background: transparent;      color: var(--texto-3); }
-
-  .cartao-topo {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--linha-2);
-  }
-
-  .cartao-topo h2 {
-    font-family: var(--sc);
-    font-size: 12.5px;
-    font-weight: 700;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-  }
-
-  .cartao-topo h2 svg { width: 14px; height: 14px; color: var(--ouro); }
-  .cartao-topo .dica { font-size: 11.5px; color: var(--texto-3); }
-
-  .cartao-corpo { padding: 11px 12px; }
-
-  /* ---------- Faixa de saudação ---------- */
-  .saudacao {
-    flex: none;
-    background: var(--preto);
-    color: var(--papel-2);
-    border-radius: var(--r);
-    padding: 10px 14px;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px 14px;
-    font-size: 12.5px;
-  }
-
-  .saudacao h1 {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--ouro-claro);
-    letter-spacing: .01em;
-  }
-
-  .saudacao span { color: #B8B2A5; }
-  .saudacao b { color: #fff; font-weight: 600; }
-
-  .selo-demo {
-    margin-left: auto;
-    font-family: var(--sc);
-    font-size: 9.5px;
-    font-weight: 600;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    color: var(--ouro-faixa);
-    border: 1px dashed var(--ouro);
-    padding: 2px 8px;
-    border-radius: 999px;
-    white-space: nowrap;
-  }
-
-  /* ---------- Contadores ---------- */
+  /* ---------- Números ---------- */
   .contadores { display: flex; flex-direction: column; gap: 7px; }
-
-  .contador { display: flex; align-items: baseline; gap: 10px; }
-
+  .contador { display: flex; align-items: baseline; gap: 9px; }
   .contador .n {
-    font-size: 17px;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    min-width: 24px;
-    line-height: 1.1;
+    min-width: 3.2ch; font-size: 17px; font-weight: 700;
+    font-variant-numeric: tabular-nums; line-height: 1.1;
   }
+  .contador .rot { font-size: 12px; color: var(--texto-2); }
+  .n--alerta { color: var(--nova-ink); }
+  .n--aviso  { color: var(--falha-ink); }
+  .n--bom    { color: var(--limpo-ink); }
+  .n--zero   { color: var(--texto-3); }
 
-  .contador .n--alerta { color: var(--nova-ink); }
-  .contador .n--bom    { color: var(--limpo-ink); }
-  .contador .n--aviso  { color: var(--falha-ink); }
-  .contador .n--zero   { color: var(--texto-3); }
-
-  .contador .rot { font-size: 12.5px; color: var(--texto-2); line-height: 1.25; }
-
-  .sub-rot {
-    font-family: var(--sc);
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--texto-3);
-    margin: 2px 0 4px;
-  }
-
-  .grade-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-
-  /* ---------- Rosca ---------- */
-  .rosca-area { display: flex; align-items: center; gap: 14px; }
-
-  .rosca { position: relative; width: 118px; height: 118px; flex: none; }
-
-  .rosca-centro {
-    position: absolute; inset: 0;
-    display: grid; place-content: center; text-align: center;
-  }
-
-  .rosca-centro .n { font-size: 28px; font-weight: 700; line-height: 1.05; font-variant-numeric: tabular-nums; }
-  .rosca-centro .base { font-size: 11px; color: var(--texto-2); }
-
-  .rosca-selo {
-    position: absolute;
-    right: -4px; top: 14px;
-    background: var(--preto);
-    color: var(--ouro-claro);
-    font-family: var(--sc);
-    font-size: 11px;
-    font-weight: 700;
-    padding: 2px 6px;
-    border-radius: 999px;
-  }
-
-  /* ---------- Barras ---------- */
-  .bloco-dept { border: 1px solid var(--linha); border-radius: var(--r); padding: 9px 10px; }
-  .bloco-dept + .bloco-dept { margin-top: 9px; }
-
-  .bloco-dept .nome {
-    background: var(--papel-3);
-    border-radius: 3px;
-    padding: 4px 8px;
-    font-family: var(--sc);
-    font-size: 11.5px;
-    font-weight: 700;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    text-align: center;
-    margin-bottom: 8px;
-  }
-
-  .nota {
-    margin: 8px 0 0;
-    font-size: 11.5px;
-    line-height: 1.45;
-    color: var(--texto-2);
-  }
-  .nota code {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 11px;
-    background: var(--papel-3);
-    padding: 1px 4px;
-    border-radius: 3px;
-  }
-
-  .medida + .medida { margin-top: 7px; }
-
-  .trilha { height: 4px; background: var(--papel-3); border-radius: 2px; overflow: hidden; }
-  .preenche { height: 100%; background: var(--ouro-faixa); border-radius: 2px; }
+  .medida + .medida { margin-top: 8px; }
+  .trilha { height: 4px; background: var(--linha-2); border-radius: 2px; overflow: hidden; }
+  .preenche { height: 100%; background: var(--ouro-2); border-radius: 2px; }
   .preenche.bom { background: var(--limpo); }
   .preenche.alerta { background: var(--nova); }
-
   .medida .leg {
-    display: flex; align-items: baseline; justify-content: space-between;
-    gap: 8px; margin-top: 3px; font-size: 11.5px; color: var(--texto-2);
+    display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+    margin-top: 4px; font-size: 11.5px; color: var(--texto-2);
   }
-
   .medida .leg b { font-variant-numeric: tabular-nums; color: var(--texto); font-weight: 600; }
 
   /* ---------- Tabela ---------- */
-  .rolagem { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; min-width: 480px; }
+  .rolagem { overflow: auto; min-height: 0; flex: 1 1 auto; }
+  table { width: 100%; border-collapse: collapse; }
 
   thead th {
+    position: sticky; top: 0; z-index: 1;
     text-align: left;
-    font-family: var(--sc);
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--texto-3);
-    padding: 6px 10px;
+    padding: 7px 10px;
+    background: var(--carta-2);
     border-bottom: 1px solid var(--linha);
+    font-size: 10px; font-weight: 600;
+    letter-spacing: .09em; text-transform: uppercase;
+    color: var(--texto-3);
     white-space: nowrap;
   }
+  thead th.dir { text-align: right; }
 
-  thead th.dir, tbody td.dir { text-align: right; }
-
-  tbody tr { cursor: pointer; border-bottom: 1px solid var(--linha-2); }
-  tbody tr:last-child { border-bottom: 0; }
-  tbody tr:hover { background: var(--papel); }
-  tbody tr[aria-selected="true"] { background: var(--papel-3); }
-
-  tbody td { padding: 6px 10px; vertical-align: middle; }
-  td.faixa { width: 3px; padding: 0 !important; }
-  td.empresa { min-width: 150px; }
-
-  td.id {
-    font-variant-numeric: tabular-nums;
-    font-weight: 700;
-    font-size: 12px;
-    color: var(--texto-3);
-    text-align: right;
-    width: 34px;
-    padding-right: 4px !important;
-  }
-
-  .id-selo {
-    display: inline-block;
-    background: var(--papel-3);
-    color: var(--texto-2);
-    font-variant-numeric: tabular-nums;
-    font-weight: 700;
-    font-size: 11.5px;
-    padding: 1px 6px;
-    border-radius: 3px;
-    margin-right: 4px;
-  }
-
-  td.pontos { white-space: nowrap; }
-
-  .ponto {
-    display: inline-block;
-    width: 8px; height: 8px;
-    border-radius: 2px;
-    margin-right: 3px;
+  tbody td {
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--linha-2);
     vertical-align: middle;
   }
+  tbody tr { cursor: pointer; }
+  tbody tr:hover { background: var(--carta-2); }
+  tbody tr[aria-selected="true"] { background: #FBF6E8; }
+  tbody tr:focus-visible { outline: 2px solid var(--ouro-2); outline-offset: -2px; }
 
-  .empresa .nome { font-weight: 600; line-height: 1.2; font-size: 12.5px; }
-  .empresa .cnpj { font-size: 11px; color: var(--texto-3); font-variant-numeric: tabular-nums; }
-
-  .contagem { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
-
-  /* ---------- Selos ---------- */
-  .selo {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 2px 7px;
-    border-radius: 3px;
-    font-family: var(--sc);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: .05em;
-    text-transform: uppercase;
+  /* Uma linha por cliente: nome e CNPJ lado a lado, sem quebra. */
+  td.faixa { width: 3px; padding: 0; }
+  td.id {
+    width: 46px; text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-size: 11.5px; color: var(--texto-3);
+  }
+  td.empresa { width: 42%; max-width: 0; }
+  td.empresa .nome {
+    font-weight: 600; font-size: 12.5px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  td.empresa .cnpj {
+    font-family: var(--mono); font-size: 10.5px; color: var(--texto-3);
     white-space: nowrap;
   }
+  td.campo {
+    font-size: 12px; color: var(--texto-2);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 0;
+  }
+  td.vazio { padding: 30px 12px; text-align: center; color: var(--texto-3); }
 
-  .selo .glifo { font-size: 8px; line-height: 1; }
+  .pontos { display: flex; gap: 3px; }
+  .ponto { width: 7px; height: 7px; border-radius: 2px; display: inline-block; }
+
+  /* ---------- Selo ---------- */
+  .selo {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 7px; border-radius: 4px;
+    font-size: 11px; font-weight: 600; white-space: nowrap;
+  }
   .selo.limpo     { background: var(--limpo-bg);  color: var(--limpo-ink); }
   .selo.nova      { background: var(--nova-bg);   color: var(--nova-ink); }
   .selo.falha     { background: var(--falha-bg);  color: var(--falha-ink); }
   .selo.conhecida { background: var(--neutro-bg); color: var(--neutro-ink); }
-
-  .mudanca {
-    font-family: var(--sc);
-    font-size: 11.5px;
-    font-weight: 600;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-    white-space: nowrap;
+  .id-selo {
+    display: inline-block; padding: 1px 6px; border-radius: 4px;
+    background: var(--fundo); color: var(--texto-2);
+    font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums;
   }
 
-  .mudanca.sobe { color: var(--nova-ink); }
-  .mudanca.desce { color: var(--limpo-ink); }
-  .mudanca.igual { color: var(--texto-3); font-weight: 500; }
+  /* ---------- Ficha ---------- */
+  .secao { padding: 12px 14px; }
+  .secao + .secao { border-top: 1px solid var(--linha-2); }
+  .secao .eyebrow { display: block; margin-bottom: 8px; }
 
-  /* ---------- Detalhe ---------- */
-  .ficha { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; font-size: 11.5px; }
+  .ficha { display: grid; grid-template-columns: minmax(96px, 40%) minmax(0, 1fr); gap: 5px 12px; margin: 0; }
+  .ficha dt { font-size: 11.5px; color: var(--texto-3); }
+  .ficha dd { margin: 0; font-size: 12.5px; overflow-wrap: anywhere; }
+  .nulo { color: var(--texto-3); font-style: italic; }
 
-  .ficha dt {
-    font-family: var(--sc);
-    font-size: 9.5px;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--texto-3);
-    align-self: center;
+  .titulo-ficha {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 14.5px; font-weight: 600; line-height: 1.3;
   }
 
-  .ficha dd { margin: 0; font-variant-numeric: tabular-nums; }
-
-  .pendencias { list-style: none; margin: 0; padding: 0; }
-
-  .pendencia {
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--linha-2);
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-
-  .pendencia:last-child { border-bottom: 0; }
-  .pendencia.nova { box-shadow: inset 3px 0 0 var(--nova); }
-  .pendencia.resolvida { box-shadow: inset 3px 0 0 var(--limpo); }
-
-  .pendencia .cabeca { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
-  .pendencia .tipo { font-weight: 600; line-height: 1.25; font-size: 12.5px; }
-  .pendencia .valor { font-size: 12.5px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
-
-  .pendencia .meta {
-    display: flex; flex-wrap: wrap; align-items: center;
-    gap: 6px; font-size: 11.5px; color: var(--texto-2);
-  }
-
-  .etiqueta {
-    font-family: var(--sc);
-    font-size: 9.5px;
-    font-weight: 700;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    padding: 1px 6px;
-    border-radius: 3px;
-  }
-
-  .etiqueta.nova      { background: var(--nova-bg);   color: var(--nova-ink); }
-  .etiqueta.resolvida { background: var(--limpo-bg);  color: var(--limpo-ink); }
-  .etiqueta.mantida   { background: var(--neutro-bg); color: var(--neutro-ink); }
-
-  .cartao-pe {
-    padding: 8px 12px;
-    border-top: 1px solid var(--linha-2);
-    background: var(--papel);
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 6px;
-    border-radius: 0 0 var(--r) var(--r);
-  }
-
-  .cartao-pe .origem {
-    font-family: var(--sc);
-    font-size: 9.5px;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: var(--texto-3);
-  }
-
-  .botao {
-    font-family: var(--sc);
-    font-size: 11.5px;
-    font-weight: 600;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    padding: 5px 11px;
-    border: 1px solid var(--preto);
-    border-radius: 3px;
-    background: var(--preto);
-    color: var(--ouro-claro);
-    cursor: pointer;
-  }
-
-  .botao.vazado { background: transparent; color: var(--texto); }
-  .botao:hover { border-color: var(--ouro); }
-
-  .vazio { padding: 16px 12px; color: var(--texto-2); font-size: 12.5px; }
-
-  /* ---------- Log ---------- */
-  .log {
-    margin: 0;
-    padding: 9px 12px;
-    font-family: var(--mono);
-    font-size: 10.5px;
-    line-height: 1.7;
-    color: var(--texto-2);
-    max-height: 168px;
-    overflow: auto;
-  }
-
-  .log .ts { color: var(--texto-3); }
-  .log .ok { color: var(--limpo-ink); font-weight: 600; }
-  .log .er { color: var(--falha-ink); font-weight: 600; }
-  .log .al { color: var(--nova-ink); font-weight: 600; }
-
-  /* ---------- Módulos: uma linha cada, não oito cartões ---------- */
-  .modulos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 16px; }
-
-  .modulo {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 5px 0;
-    border-bottom: 1px solid var(--linha-2);
-    font-size: 12.5px;
-  }
-
-  .modulo .nome { font-weight: 600; }
-
-  .estagio {
-    font-family: var(--sc);
-    font-size: 9.5px;
-    font-weight: 700;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    padding: 1px 6px;
-    border-radius: 3px;
-    white-space: nowrap;
-  }
-
-  .estagio.pronto  { background: var(--limpo-bg); color: var(--limpo-ink); }
-  .estagio.proximo { background: #F7E9C9; color: #7A5A0F; }
-  .estagio.depois  { background: var(--neutro-bg); color: var(--neutro-ink); }
-
-  .nota-pe {
-    flex: none;
-    background: var(--preto);
-    color: #B8B2A5;
+  /* ---------- Tela da ficha ----------
+     Clicar num cliente salta para a ficha dele em tela cheia. O painel
+     lateral de 340px espremia o cadastro em duas colunas estreitas e
+     obrigava a rolar dentro de uma caixa dentro de outra. */
+  .ficha-topo {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 14px 16px;
+    background: var(--carta);
+    border: 1px solid var(--linha);
     border-radius: var(--r);
-    padding: 8px 12px;
-    font-size: 11.5px;
-    line-height: 1.4;
+    box-shadow: var(--sombra);
+  }
+  .ficha-topo h1 { font-size: 17px; line-height: 1.25; min-width: 0; }
+  .ficha-topo .acoes-ficha { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .voltar {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 11px 6px 8px;
+    border: 1px solid var(--linha); border-radius: 6px;
+    background: var(--carta); color: var(--texto-2);
+    font-size: 12px; font-weight: 600; cursor: pointer;
+  }
+  .voltar:hover { background: var(--fundo); color: var(--texto); }
+  .voltar svg { width: 14px; height: 14px; }
+
+  .grade-ficha {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 12px;
+    align-items: start;
   }
 
-  .nota-pe b { color: var(--ouro-claro); font-weight: 600; }
+  /* ---------- Formulário ---------- */
+  .campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px 12px; }
+  .campo-form { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .campo-form.largo { grid-column: 1 / -1; }
+  .campo-form label { font-size: 11px; font-weight: 600; color: var(--texto-2); }
+  .campo-form input,
+  .campo-form select {
+    width: 100%;
+    padding: 7px 9px;
+    border: 1px solid var(--linha);
+    border-radius: 6px;
+    background: var(--carta);
+    font: inherit; font-size: 12.5px; color: var(--texto);
+    outline: none;
+  }
+  .campo-form input:focus, .campo-form select:focus { border-color: var(--ouro-2); }
+  .campo-form input[type="checkbox"] { width: auto; }
+  .campo-form .ajuda { font-size: 10.5px; color: var(--texto-3); }
+  .campo-form.erro input { border-color: var(--nova); background: var(--nova-bg); }
+  .campo-form .msg { font-size: 10.5px; color: var(--nova-ink); }
 
-  /* ---------- Telas menores: volta a rolar como documento ---------- */
-  @media (max-width: 1100px) {
-    .app { height: auto; overflow: visible; }
-    .coluna { overflow: visible; }
-    .conteudo { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); }
-    .coluna.direita { grid-column: 1 / -1; }
-    .log { max-height: none; }
+  .par { display: flex; align-items: center; gap: 7px; }
+  .par label { font-size: 12px; color: var(--texto); font-weight: 500; }
+
+  /* ---------- Modal ---------- */
+  .fundo-modal {
+    position: fixed; inset: 0; z-index: 40;
+    background: rgba(23, 24, 26, .45);
+    display: grid; place-items: center;
+    padding: 20px;
+  }
+  .modal {
+    background: var(--carta);
+    border-radius: 10px;
+    box-shadow: 0 18px 50px rgba(20, 20, 18, .25);
+    width: min(760px, 100%);
+    max-height: 90vh;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .modal-topo {
+    flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 14px 16px; border-bottom: 1px solid var(--linha);
+  }
+  .modal-topo h2 { font-size: 15px; }
+  .modal-corpo { overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 16px; }
+  .modal-pe {
+    flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 12px 16px; border-top: 1px solid var(--linha); background: var(--carta-2);
+  }
+  .fechar {
+    border: 0; background: none; cursor: pointer; padding: 4px;
+    color: var(--texto-3); line-height: 0; border-radius: 4px;
+  }
+  .fechar:hover { background: var(--fundo); color: var(--texto); }
+  .fechar svg { width: 16px; height: 16px; }
+
+  /* ---------- Avisos ---------- */
+  .placa {
+    grid-column: 1 / -1;
+    background: var(--carta);
+    border: 1px solid var(--linha);
+    border-left: 3px solid var(--ouro-2);
+    border-radius: var(--r);
+    padding: 18px 20px;
+    max-width: 78ch;
+    display: flex; flex-direction: column; gap: 9px;
+  }
+  .placa h3 { font-size: 13.5px; }
+  .placa p, .placa li { margin: 0; color: var(--texto-2); font-size: 12.5px; }
+  .placa ul { margin: 0; padding-left: 18px; }
+  .placa code {
+    font-family: var(--mono); font-size: 11.5px;
+    background: var(--fundo); padding: 1px 5px; border-radius: 4px;
+  }
+  .placa-duvida { border-left-color: var(--falha); background: var(--falha-bg); }
+  .placa-duvida h3, .placa-duvida p { color: var(--falha-ink); }
+  .placa-erro { border-left-color: var(--nova); background: var(--nova-bg); }
+  .placa-erro h3, .placa-erro p { color: var(--nova-ink); }
+
+  .nota { margin: 8px 0 0; font-size: 11.5px; color: var(--texto-2); }
+  .nota code {
+    font-family: var(--mono); font-size: 11px;
+    background: var(--fundo); padding: 1px 4px; border-radius: 3px;
   }
 
-  @media (max-width: 800px) {
+  .listas { display: flex; flex-direction: column; gap: 7px; }
+  .lista { display: grid; grid-template-columns: 3.4ch minmax(0, 1fr) auto; align-items: center; gap: 10px; }
+  .lista .n { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .lista .rot { font-size: 12px; color: var(--texto-2); }
+  .lista .botao { padding: 3px 9px; font-size: 11px; }
+
+  /* Carregando / sem banco */
+  .estado-vazio {
+    grid-column: 1 / -1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; padding: 60px 20px; text-align: center; color: var(--texto-2);
+  }
+  .estado-vazio h3 { font-size: 14px; color: var(--texto); }
+  .estado-vazio p { margin: 0; max-width: 46ch; font-size: 12.5px; }
+
+  .aviso-linha {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px; font-size: 12px;
+    background: var(--falha-bg); color: var(--falha-ink);
+    border-bottom: 1px solid var(--linha);
+  }
+
+  @media (max-width: 1120px) {
     .conteudo { grid-template-columns: minmax(0, 1fr); }
-    .grade-2, .modulos { grid-template-columns: minmax(0, 1fr); }
   }
-
-  @media (max-width: 560px) {
-    .trilho { width: 52px; }
-    .item { font-size: 0; gap: 0; padding: 9px 2px; }
-    .conteudo { padding: 10px; }
+  @media (max-width: 780px) {
+    .trilho { width: 56px; }
+    .item { justify-content: center; padding: 9px 0; }
+    .item span { display: none; }
+    .marca-simbolo { background-position: center; }
   }
 </style>
 
@@ -776,30 +594,32 @@
 
     <button class="item" type="button" aria-current="page" data-vista="painel">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
-      Painel
+      <span>Painel</span>
     </button>
     <button class="item" type="button" data-vista="clientes">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 9h2M9 13h2M13 9h2M13 13h2"/></svg>
-      Clientes
+      <span>Clientes</span>
     </button>
     <button class="item" type="button" data-vista="certidoes">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
-      Certidões
+      <span>Certidões</span>
     </button>
     <button class="item" type="button" data-vista="guias">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg>
-      Guias
+      <span>Guias</span>
     </button>
     <button class="item" type="button" data-vista="relatorios">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15v3M12 10v8M17 6v12"/></svg>
-      Relatórios
+      <span>Relatórios</span>
     </button>
     <button class="item" type="button" data-vista="ajustes">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.82 1.18V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 7.26 19.4l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3.09 14H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 7.26l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 2.82 1.18l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 20.91 10H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      Ajustes
+      <span>Ajustes</span>
     </button>
 
-    <div class="avatar" title="Michel Melo">MM</div>
+    <div class="rodape-trilho">
+      <div class="avatar" title="Grupo Case">GC</div>
+    </div>
   </nav>
 
   <div class="principal">
@@ -807,14 +627,11 @@
     <header class="topo">
       <label class="busca">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input id="busca" type="search" placeholder="Buscar por ID, nome, CNPJ, responsável ou cidade" aria-label="Buscar cliente">
+        <input id="busca" type="search" placeholder="Buscar cliente, CNPJ ou responsável" aria-label="Buscar cliente">
       </label>
 
-      <div class="acoes" role="group" aria-label="Filtrar carteira">
-        <button class="acao" type="button" data-filtro="todos" aria-pressed="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg>
-          Todos <span class="qtd"></span>
-        </button>
+      <div class="acoes" role="group" aria-label="Filtrar clientes">
+        <button class="acao" type="button" data-filtro="todos" aria-pressed="true">Todos <span class="qtd"></span></button>
         <button class="acao" type="button" data-filtro="acao" aria-pressed="false">Exigem ação <span class="qtd"></span></button>
         <button class="acao" type="button" data-filtro="sem-procuracao" aria-pressed="false">Sem procuração <span class="qtd"></span></button>
         <button class="acao" type="button" data-filtro="certificado" aria-pressed="false">Certificado <span class="qtd"></span></button>
@@ -822,58 +639,38 @@
         <button class="acao" type="button" data-filtro="det" aria-pressed="false">Sem DET <span class="qtd"></span></button>
       </div>
 
+      <span id="marca-filtro" hidden></span>
+
       <div class="estado-topo">
-        <span class="pulso" aria-hidden="true"></span>
-        <span>Base: planilha de controle <b>04/09/2026</b></span>
+        <span class="pulso" id="pulso" aria-hidden="true"></span>
+        <span id="estado-base">Conectando…</span>
       </div>
     </header>
 
-    <main class="conteudo vista" data-vista="painel" data-ativa>
+    <div id="aviso-base" hidden></div>
 
+    <!-- ---------- PAINEL ---------- -->
+    <main class="conteudo vista vista-unica" data-vista="painel" data-ativa>
       <div class="coluna">
-
-        <section class="saudacao">
-          <h1>Olá, Michel!</h1>
-          <span><b id="m-total">—</b> clientes na base · o robô alcança <b id="m-alcance">—</b> hoje · <b id="m-sem-proc">—</b> sem procuração e-CAC</span>
-          <span class="selo-demo">Dados reais · CONTROLE_5</span>
-        </section>
-
-        <div class="grade-2">
+        <div class="grade-3">
           <section class="cartao">
-            <div class="cartao-topo">
-              <h2>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 20h20z"/><path d="M12 9v5M12 17h.01"/></svg>
-                Prioridade
-              </h2>
-            </div>
-            <div class="cartao-corpo contadores">
-              <div class="contador"><span class="n n--alerta" id="m-sem-proc-2">—</span><span class="rot">Sem procuração e-CAC</span></div>
-              <div class="contador"><span class="n n--alerta" id="m-proc-vencida">—</span><span class="rot">Procuração e-CAC vencida</span></div>
-              <div class="contador"><span class="n n--aviso" id="m-proc-vence">—</span><span class="rot">Procuração vence em 90 dias</span></div>
-              <div class="contador"><span class="n n--zero" id="m-proc-sem-data">—</span><span class="rot">Procuração sem validade registrada</span></div>
-            </div>
+            <div class="cartao-topo"><h2>Prioridade</h2><span class="dica">procuração</span></div>
+            <div class="cartao-corpo"><div class="contadores" id="m-prioridade"></div></div>
           </section>
-
           <section class="cartao">
             <div class="cartao-topo"><h2>Certificado digital</h2><span class="dica">do cliente</span></div>
-            <div class="cartao-corpo contadores">
-              <div class="contador"><span class="n n--alerta" id="m-cert-vencido">—</span><span class="rot">Vencidos</span></div>
-              <div class="contador"><span class="n n--aviso" id="m-cert-vence">—</span><span class="rot">Vencem em 90 dias</span></div>
-              <div class="contador"><span class="n n--zero" id="m-cert-sem">—</span><span class="rot">Sem certificado cadastrado</span></div>
-              <p class="sub-rot">Outros vínculos</p>
-              <div class="contador"><span class="n n--aviso" id="m-sem-det">—</span><span class="rot">Sem DET</span></div>
-              <div class="contador"><span class="n n--zero" id="m-sem-resp">—</span><span class="rot">Sem responsável no Onvio</span></div>
-            </div>
+            <div class="cartao-corpo"><div class="contadores" id="m-certificado"></div></div>
+          </section>
+          <section class="cartao">
+            <div class="cartao-topo"><h2>Alcance do robô</h2><span class="dica">com procuração e-CAC</span></div>
+            <div class="cartao-corpo"><div class="contadores" id="m-alcance"></div></div>
           </section>
         </div>
 
-        <section class="cartao">
+        <section class="cartao cresce">
           <div class="cartao-topo">
-            <h2>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/></svg>
-              Clientes
-            </h2>
-            <span class="dica"><span id="contagem-clientes">—</span> · clique para abrir</span>
+            <h2>Clientes</h2>
+            <span class="dica"><span id="contagem-clientes">—</span></span>
           </div>
           <div class="rolagem">
             <table>
@@ -891,91 +688,23 @@
             </table>
           </div>
         </section>
-
-        <section class="cartao">
-          <div class="cartao-topo"><h2>Certidões por tipo</h2><span class="dica">sobre os 112 clientes</span></div>
-          <div class="cartao-corpo" id="certidoes-tipos"></div>
-        </section>
-
-        <section class="cartao">
-          <div class="cartao-topo"><h2>Módulos</h2><span class="dica">O que existe e o que vem depois</span></div>
-          <div class="cartao-corpo">
-            <div class="modulos">
-              <div class="modulo"><span class="nome">Base da planilha</span><span class="estagio pronto">Pronto</span></div>
-              <div class="modulo"><span class="nome">Coleta no portal</span><span class="estagio proximo">Próximo</span></div>
-              <div class="modulo"><span class="nome">Histórico e comparação</span><span class="estagio proximo">Próximo</span></div>
-              <div class="modulo"><span class="nome">Avisos automáticos</span><span class="estagio depois">Depois</span></div>
-              <div class="modulo"><span class="nome">Login da equipe</span><span class="estagio depois">Depois</span></div>
-              <div class="modulo"><span class="nome">Caixa Postal</span><span class="estagio depois">Depois</span></div>
-              <div class="modulo"><span class="nome">Guias · DAS e DARF</span><span class="estagio depois">Depois</span></div>
-              <div class="modulo"><span class="nome">Certidão negativa</span><span class="estagio depois">Depois</span></div>
-            </div>
-          </div>
-        </section>
-
-        <div class="nota-pe">
-          <b>Estes números são a sua planilha, não a Receita.</b> A tela lê o CONTROLE e mostra o que ele diz. A consulta automática ao portal ainda não rodou — quando rodar, ela substitui as colunas de certidão por dado do dia.
-        </div>
       </div>
 
-      <div class="coluna">
-        <section class="cartao">
-          <div class="cartao-topo"><h2>Alcance do robô</h2><span class="dica">com procuração e-CAC</span></div>
-          <div class="cartao-corpo">
-            <div class="rosca-area">
-              <div class="rosca">
-                <svg viewBox="0 0 118 118" width="118" height="118" role="img" aria-label="Clientes que o robô alcança">
-                  <circle cx="59" cy="59" r="48" fill="none" stroke="#EAE4D5" stroke-width="11"/>
-                  <circle id="arco" cx="59" cy="59" r="48" fill="none" stroke="#3F7A34" stroke-width="11"
-                          stroke-linecap="round" stroke-dasharray="0 302" transform="rotate(-90 59 59)"/>
-                </svg>
-                <div class="rosca-centro">
-                  <span class="n" id="m-rosca-n">—</span>
-                  <span class="base" id="m-rosca-base">—</span>
-                </div>
-                <span class="rosca-selo" id="m-rosca-pct">—</span>
-              </div>
-              <div class="contadores" style="flex:1">
-                <div class="contador"><span class="n n--bom" id="m-com-det">—</span><span class="rot">Com DET ativo</span></div>
-                <div class="contador"><span class="n n--alerta" id="m-sem-proc-3">—</span><span class="rot">Fora do alcance do robô</span></div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="cartao" id="detalhe"></section>
-      </div>
-
-      <div class="coluna direita">
-        <section class="cartao">
-          <div class="cartao-topo"><h2>Por certificado</h2></div>
-          <div class="cartao-corpo">
-            <div class="bloco-dept">
-              <div class="nome">e-CNPJ do escritório</div>
-              <div id="cert-escritorio"></div>
-            </div>
-
-            <div class="bloco-dept">
-              <div class="nome">e-CPF do responsável</div>
-              <div id="cert-responsavel"></div>
-            </div>
-          </div>
-        </section>
-
-        <section class="cartao">
-          <div class="cartao-topo"><h2>Por responsável</h2><span class="dica">Onvio</span></div>
-          <div class="cartao-corpo" id="responsaveis"></div>
-        </section>
-      </div>
     </main>
 
     <!-- ---------- CLIENTES ---------- -->
-    <main class="conteudo vista vista-larga" data-vista="clientes">
+    <main class="conteudo vista vista-unica" data-vista="clientes">
       <div class="coluna">
-        <section class="cartao">
+        <section class="cartao cresce">
           <div class="cartao-topo">
-            <h2>Todos os clientes</h2>
-            <span class="dica"><span id="cont-clientes-2">—</span> · clique para abrir</span>
+            <h2>Clientes</h2>
+            <span style="display:flex;align-items:center;gap:10px">
+              <span class="dica"><span id="cont-clientes-2">—</span></span>
+              <button class="botao" type="button" data-novo>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                Novo cliente
+              </button>
+            </span>
           </div>
           <div class="rolagem">
             <table>
@@ -995,9 +724,11 @@
           </div>
         </section>
       </div>
-      <div class="coluna">
-        <section class="cartao" id="detalhe-2"></section>
-      </div>
+    </main>
+
+    <!-- ---------- FICHA DO CLIENTE ---------- -->
+    <main class="conteudo vista vista-unica" data-vista="ficha">
+      <div class="coluna" id="ficha"></div>
     </main>
 
     <!-- ---------- CERTIDÕES ---------- -->
@@ -1005,26 +736,19 @@
       <div class="coluna">
         <div class="placa placa-duvida">
           <h3>Leia antes de acreditar nestes números</h3>
-          <p>A planilha guarda <b>uma data por certidão</b> e não diz se ela é a <b>data de emissão</b> ou a <b>data de validade</b>. O sistema está lendo como validade — por isso quase tudo aparece como vencido.</p>
-          <p>Se forem datas de emissão, a leitura correta é outra: uma CND federal vale 180 dias a contar da emissão, e boa parte do que está vermelho aqui estaria válida. <b>Michel, me diga qual das duas é</b> — é um ajuste de uma linha, e sem ele esta tela mente.</p>
+          <p>O cadastro guarda <b>uma data por certidão</b> e não registra se ela é a <b>data de emissão</b> ou a <b>data de validade</b>. O sistema está lendo como validade — por isso quase tudo aparece como vencido.</p>
+          <p>Se forem datas de emissão, a leitura é outra: uma CND federal vale 180 dias a contar da emissão, e boa parte do que está vermelho aqui estaria válida. <b>Enquanto isso não for definido, esta tela não serve para decidir nada.</b></p>
         </div>
         <div class="grade-3" id="resumo-certidoes"></div>
-        <section class="cartao">
-          <div class="cartao-topo">
-            <h2>Matriz de certidões</h2>
-            <span class="dica"><span id="cont-certidoes">—</span> clientes</span>
-          </div>
+        <section class="cartao cresce">
+          <div class="cartao-topo"><h2>Matriz de certidões</h2><span class="dica"><span id="cont-certidoes">—</span> clientes</span></div>
           <div class="rolagem">
             <table>
               <thead>
                 <tr>
                   <th class="dir">ID</th>
                   <th>Cliente</th>
-                  <th>Federal</th>
-                  <th>FGTS</th>
-                  <th>Prefeitura</th>
-                  <th>Trabalhista</th>
-                  <th>Estadual</th>
+                  <th>Federal</th><th>FGTS</th><th>Prefeitura</th><th>Trabalhista</th><th>Estadual</th>
                 </tr>
               </thead>
               <tbody id="linhas-certidoes"></tbody>
@@ -1039,12 +763,7 @@
       <div class="coluna">
         <div class="placa">
           <h3>Guias ainda não existe</h3>
-          <p>Esta tela vai reunir DAS, DARF e GPS por cliente e competência, reaproveitando o sistema de relatórios de guias que já está no repositório.</p>
-          <p>Ela depende de duas coisas que ainda não rodaram:</p>
-          <ul>
-            <li>a coleta automática no portal da Receita, para buscar as guias;</li>
-            <li>o histórico, para saber o que é nova, paga ou vencida.</li>
-          </ul>
+          <p>Esta tela vai reunir DAS, DARF e GPS por cliente e competência. Ela depende de duas coisas que ainda não rodaram: a coleta automática no portal da Receita, para buscar as guias, e o histórico, para saber o que é nova, paga ou vencida.</p>
           <p>Preferi deixar o aviso a montar uma tela bonita sem dado por trás.</p>
         </div>
       </div>
@@ -1052,22 +771,16 @@
 
     <!-- ---------- RELATÓRIOS ---------- -->
     <main class="conteudo vista vista-unica" data-vista="relatorios">
-      <div class="coluna">
-        <div class="grade-3" id="relatorios"></div>
-      </div>
+      <div class="coluna"><div class="grade-3" id="relatorios"></div></div>
     </main>
 
     <!-- ---------- AJUSTES ---------- -->
     <main class="conteudo vista vista-unica" data-vista="ajustes">
       <div class="coluna">
         <div class="grade-3" id="ajustes"></div>
-        <div class="placa">
-          <h3>De onde vem cada número</h3>
-          <p>Tudo nesta tela sai de <b>CONTROLE_CORRETO_5.xlsx</b>, lido por <code>src/planilha.js</code>. O sistema não inventa dado: se a planilha estiver desatualizada, a tela mostra o desatualizado.</p>
-          <p>A consulta automática ao portal da Receita ainda não rodou. Quando rodar, ela passa a alimentar as colunas de certidão com o dado do dia, e a planilha vira só o cadastro.</p>
-        </div>
       </div>
     </main>
   </div>
 </div>
 
+<div id="modal"></div>
