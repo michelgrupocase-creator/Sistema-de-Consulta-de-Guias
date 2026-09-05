@@ -118,8 +118,13 @@
   }
 
   // Certidão é uma data, ou o texto do impedimento, ou nada.
+  // Certidão só existe depois que a consulta roda. Antes disso ela não é
+  // "vazia" nem "vencida" — ela é DESCONHECIDA, e a tela precisa dizer isso.
+  // O que veio da planilha foi descartado: eram datas soltas que ninguém
+  // sabia se eram de emissão ou de validade, e ler errado apontava dezenas
+  // de vencimentos falsos.
   function certidao(v) {
-    if (!v) return { estado: 'vazio', texto: '—' };
+    if (!v) return { estado: 'vazio', texto: 'Não consultada' };
     if (ehData(v)) {
       const d = dias(v);
       if (d < 0) return { estado: 'vencida', texto: `Vencida em ${brData(v)}` };
@@ -140,16 +145,24 @@
     if (impedidas) return { chave: 'impedida', rotulo: `${impedidas} impedida${impedidas > 1 ? 's' : ''}` };
     if (p.estado === 'vence' || cf.estado === 'vence') return { chave: 'vence', rotulo: 'Vence em breve' };
     if (vencidas) return { chave: 'vencidas', rotulo: `${vencidas} vencida${vencidas > 1 ? 's' : ''}` };
+
+    // Sem nenhuma certidão consultada não dá para dizer "em dia": seria
+    // afirmar o que o sistema não sabe.
+    const consultadas = cd.filter(Boolean).length;
+    if (!consultadas) return { chave: 'sem-consulta', rotulo: 'Não consultado' };
+
     return { chave: 'ok', rotulo: 'Em dia' };
   }
 
   const COR = {
     'sem-procuracao': 'var(--nova)', bloqueado: 'var(--nova)', impedida: 'var(--falha)',
-    vence: 'var(--falha)', vencidas: 'var(--linha)', ok: 'var(--limpo)',
+    vence: 'var(--falha)', vencidas: 'var(--linha)',
+    'sem-consulta': 'var(--linha-2)', ok: 'var(--limpo)',
   };
   const CLASSE = {
     'sem-procuracao': 'nova', bloqueado: 'nova', impedida: 'falha',
-    vence: 'falha', vencidas: 'conhecida', ok: 'limpo',
+    vence: 'falha', vencidas: 'conhecida',
+    'sem-consulta': 'conhecida', ok: 'limpo',
   };
 
   /* ---------- Estado ---------- */
@@ -695,7 +708,7 @@
                   ${CERTIDOES.map(
                     (rot, n) => `<div class="campo-form"><label for="f_c${n}">${rot}</label>
                       <input id="f_c${n}" name="c-${n}" type="text" value="${escapar(c?.cd?.[n] ?? '')}">
-                      <span class="ajuda">Data AAAA-MM-DD, ou o impedimento.</span></div>`
+                      <span class="ajuda">Normalmente preenchido pela consulta. Em branco = não consultada.</span></div>`
                   ).join('')}
                 </div>
               </div>
@@ -958,13 +971,17 @@
     $('resumo-certidoes').innerHTML = CERTIDOES.map((nome, n) => {
       const est = CLIENTES.map((c) => certidao(c.cd?.[n]).estado);
       const q = (e) => est.filter((x) => x === e).length;
+      const consultadas = total - q('vazio');
       return `<section class="cartao">
-        <div class="cartao-topo"><h2>${nome}</h2><span class="dica">${Math.round((q('valida') / total) * 100)}% com data válida</span></div>
+        <div class="cartao-topo">
+          <h2>${nome}</h2>
+          <span class="dica">${consultadas ? `${consultadas} de ${total} consultadas` : 'nunca consultada'}</span>
+        </div>
         <div class="cartao-corpo"><div class="contadores">${contadores([
-          [q('valida'), 'Com data válida', 'bom', `cd-${n}-valida`],
+          [q('valida'), 'Válida', 'bom', `cd-${n}-valida`],
           [q('impedida'), 'Impedida', 'alerta', `cd-${n}-impedida`],
-          [q('vencida'), 'Data vencida', 'aviso', `cd-${n}-vencida`],
-          [q('vazio'), 'Em branco', 'zero', `cd-${n}-vazio`],
+          [q('vencida'), 'Vencida', 'aviso', `cd-${n}-vencida`],
+          [q('vazio'), 'Não consultada', 'zero', `cd-${n}-vazio`],
         ])}</div></div>
       </section>`;
     }).join('');
