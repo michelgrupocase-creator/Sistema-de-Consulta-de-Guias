@@ -155,7 +155,41 @@
     }
   }
 
-  /* ---------- Detalhe ---------- */
+  /* ---------- Detalhe: a ficha cadastral do cliente ---------- */
+
+  // Rótulo de cada procuração, na ordem em que o escritório usa.
+  const PROCURACOES = [
+    ['ecacE', 'e-CAC · escritório'],
+    ['ecacR', 'e-CAC · responsável'],
+    ['fgtsE', 'FGTS Digital · escritório'],
+    ['fgtsR', 'FGTS Digital · responsável'],
+    ['empWeb', 'Empregador Web'],
+    ['conect', 'Conectividade Social'],
+    ['gestao', 'Gestão de Demandas'],
+    ['det', 'DET'],
+  ];
+
+  // Um valor de cadastro só é útil se ele diz claramente quando está em branco.
+  // "—" cinza é ausência de registro; vermelho é ausência que atrapalha.
+  const vazio = (t = 'não registrado') => `<span class="nulo">${t}</span>`;
+
+  function valor(v) {
+    if (v === null || v === undefined || v === '') return vazio();
+    if (ehData(v)) return brData(v);
+    return String(v);
+  }
+
+  // Procuração tem três estados, não dois: tem com validade, tem sem validade
+  // registrada, e não tem. Achatar os dois primeiros esconde trabalho pendente.
+  function linhaProcuracao(v) {
+    if (!v) return `<span class="selo conhecida">Não</span>`;
+    if (!ehData(v)) return `<span class="selo falha">Sim · sem validade registrada</span>`;
+    const d = dias(v);
+    if (d < 0) return `<span class="selo nova">Vencida em ${brData(v)}</span>`;
+    if (d <= 90) return `<span class="selo falha">Vence em ${d} dias · ${brData(v)}</span>`;
+    return `<span class="selo limpo">Até ${brData(v)}</span>`;
+  }
+
   function desenharDetalhe() {
     const c = CLIENTES.find((x) => x.id === selecionado);
     const destinos = [detalhe, detalhe2].filter(Boolean);
@@ -173,14 +207,30 @@
       })
       .join('');
 
-    const proc = [
-      ['e-CAC · escritório', c.pe],
-      ['e-CAC · responsável', c.pr],
-      ['FGTS Digital', c.fgd ? 'Sim' : null],
-      ['DET', c.det ? 'Sim' : null],
-    ]
-      .map(([k, v]) => `<dt>${k}</dt><dd>${v ? (ehData(v) ? brData(v) : v) : '<span style="color:var(--nova-ink)">Não</span>'}</dd>`)
-      .join('');
+    const proc = PROCURACOES.map(
+      ([k, rot]) => `<dt>${rot}</dt><dd>${linhaProcuracao(c.pg?.[k])}</dd>`
+    ).join('');
+
+    const i = c.ins || {};
+    const inscricoes = `
+      <dt>CACEAL</dt><dd>${valor(i.ca)}</dd>
+      <dt>Inscrição municipal</dt><dd>${valor(i.im)}</dd>
+      <dt>NIRE</dt><dd>${valor(i.ni)}</dd>
+      <dt>Arquivamento JUCEAL</dt><dd>${valor(i.aj)}</dd>
+      <dt>Próximo arquivamento</dt><dd>${
+        ehData(i.pa) && dias(i.pa) < 0
+          ? `<span class="selo nova">Vencido em ${brData(i.pa)}</span>`
+          : valor(i.pa)
+      }</dd>`;
+
+    const f = c.fo || {};
+    const folha = `
+      <dt>Responsável DP</dt><dd>${valor(f.rp)}</dd>
+      <dt>Tem folha</dt><dd>${f.po ? 'Sim' : vazio('Não')}</dd>
+      <dt>Colaboradores 2023</dt><dd>${f.c23 ?? vazio()}</dd>
+      <dt>Colaboradores 2024</dt><dd>${f.c24 ?? vazio()}</dd>
+      <dt>Pró-labore 2023</dt><dd>${f.p23 ?? vazio()}</dd>
+      <dt>Pró-labore 2024</dt><dd>${f.p24 ?? vazio()}</dd>`;
 
     const html = `
       <div class="cartao-topo" style="display:block">
@@ -188,25 +238,39 @@
           <span class="id-selo">#${c.id}</span> ${c.n}
         </h2>
         <dl class="ficha">
-          <dt>CNPJ</dt><dd>${brCnpj(c.j)}</dd>
-          <dt>Regime</dt><dd>${c.rg ?? '—'}</dd>
-          <dt>Cidade</dt><dd>${c.ci ?? '—'}</dd>
-          <dt>Responsável</dt><dd>${c.r ?? '<span style="color:var(--falha-ink)">sem vínculo Onvio</span>'}</dd>
-          <dt>Certificado</dt><dd>${c._cf.texto}</dd>
-          ${c.fo !== null ? `<dt>Folha</dt><dd>${c.fo} colaborador(es)</dd>` : ''}
+          <dt>CNPJ</dt><dd>${c.j ? brCnpj(c.j) : vazio()}</dd>
+          <dt>Regime</dt><dd>${valor(c.rg)}</dd>
+          <dt>Cidade</dt><dd>${valor(c.ci)}</dd>
+          <dt>Responsável Onvio</dt><dd>${c.r ?? '<span style="color:var(--falha-ink)">sem vínculo Onvio</span>'}</dd>
+          <dt>Certificado digital</dt><dd>${c._cf.texto}</dd>
         </dl>
       </div>
-      <div class="cartao-corpo" style="padding-bottom:6px">
-        <p class="sub-rot" style="margin-top:0">Procurações</p>
+
+      <div class="cartao-corpo secao">
+        <p class="sub-rot">Inscrições e registros</p>
+        <dl class="ficha">${inscricoes}</dl>
+      </div>
+
+      <div class="cartao-corpo secao">
+        <p class="sub-rot">Procurações</p>
         <dl class="ficha">${proc}</dl>
       </div>
-      <p class="sub-rot" style="padding:0 12px">Certidões</p>
-      <ul class="pendencias">${linhasCert}</ul>
+
+      <div class="cartao-corpo secao">
+        <p class="sub-rot">Folha</p>
+        <dl class="ficha">${folha}</dl>
+      </div>
+
+      <div class="secao">
+        <p class="sub-rot" style="padding:0 12px">Certidões</p>
+        <ul class="pendencias">${linhasCert}</ul>
+      </div>
+
       <div class="cartao-pe">
         <span class="origem">Origem: planilha de controle</span>
         <span style="display:flex;gap:8px;">
-          <button class="botao vazado" type="button">Histórico</button>
-          <button class="botao" type="button">Consultar agora</button>
+          <button class="botao vazado" type="button" data-copiar="cnpj">Copiar CNPJ</button>
+          <button class="botao" type="button" data-copiar="ficha">Copiar ficha</button>
         </span>
       </div>`;
 
@@ -417,8 +481,11 @@
 
     const cidades = {};
     const regimes = {};
+    // A planilha grava a mesma cidade com e sem a UF ("LIMOEIRO DE ANADIA" e
+    // "LIMOEIRO DE ANADIA-AL"). No relatório isso viraria duas cidades.
+    const semUf = (v) => v.replace(/\s*[-\/]\s*[A-Z]{2}$/, '').trim();
     CLIENTES.forEach((c) => {
-      const ci = c.ci || 'sem cidade';
+      const ci = c.ci ? semUf(c.ci) : 'sem cidade';
       const rg = c.rg || 'sem regime';
       cidades[ci] = (cidades[ci] || 0) + 1;
       regimes[rg] = (regimes[rg] || 0) + 1;
@@ -435,16 +502,26 @@
         <div class="cartao-corpo">${ord(cidades).map(([k, v]) => linha(k, v)).join('')}</div>
       </section>
       <section class="cartao">
-        <div class="cartao-topo"><h2>O que exportar</h2><span class="dica">ainda manual</span></div>
+        <div class="cartao-topo"><h2>O que exportar</h2><span class="dica">cola no Excel</span></div>
         <div class="cartao-corpo">
           <p class="sub-rot" style="margin-top:0">Listas que a equipe pede toda semana</p>
-          <div class="contadores">
-            <div class="contador"><span class="n n--alerta">${CLIENTES.filter((c) => c._e.chave === 'sem-procuracao').length}</span><span class="rot">Procuração a colher</span></div>
-            <div class="contador"><span class="n n--alerta">${CLIENTES.filter((c) => c._cf.estado === 'vencido').length}</span><span class="rot">Certificado a renovar</span></div>
-            <div class="contador"><span class="n n--aviso">${CLIENTES.filter((c) => !c.det).length}</span><span class="rot">DET a habilitar</span></div>
-            <div class="contador"><span class="n n--zero">${CLIENTES.filter((c) => !c.r).length}</span><span class="rot">Sem responsável</span></div>
+          <div class="listas">
+            ${[
+              ['sem-procuracao', 'Procuração a colher', CLIENTES.filter((c) => c._e.chave === 'sem-procuracao').length, 'alerta'],
+              ['certificado', 'Certificado a renovar', CLIENTES.filter((c) => c._cf.estado === 'vencido').length, 'alerta'],
+              ['det', 'DET a habilitar', CLIENTES.filter((c) => !c.det).length, 'aviso'],
+              ['responsavel', 'Sem responsável no Onvio', CLIENTES.filter((c) => !c.r).length, 'zero'],
+            ]
+              .map(
+                ([k, rot, n, cor]) => `<div class="lista">
+                  <span class="n n--${cor}">${n}</span>
+                  <span class="rot">${rot}</span>
+                  <button class="botao vazado" type="button" data-copiar="lista-${k}">Copiar</button>
+                </div>`
+              )
+              .join('')}
           </div>
-          <p class="nota">A exportação em planilha ainda não está ligada. Os números acima já saem da base real e conferem com o painel.</p>
+          <p class="nota">Copiar cola direto no Excel: uma coluna por campo, com CNPJ, cidade, responsável e as cinco certidões.</p>
         </div>
       </section>`;
   }
@@ -491,6 +568,103 @@
         </div>
       </section>`;
   }
+
+  /* ---------- Copiar ----------
+
+     Copiar é a única ação que este painel consegue cumprir hoje de verdade:
+     ele lê a planilha, não escreve em lugar nenhum e não fala com a Receita.
+     Botão que promete mais do que isso deixa o sistema inteiro com cara de
+     maquete, então aqui só existe o que funciona. */
+
+  async function copiar(texto, botao) {
+    const rotulo = botao.textContent;
+    try {
+      await navigator.clipboard.writeText(texto);
+      botao.textContent = 'Copiado';
+    } catch {
+      // clipboard bloqueado (http, permissão negada): não finge que deu certo.
+      botao.textContent = 'Não deu — copie na mão';
+    }
+    setTimeout(() => { botao.textContent = rotulo; }, 1600);
+  }
+
+  function fichaTexto(c) {
+    const proc = PROCURACOES.map(([k, rot]) => {
+      const v = c.pg?.[k];
+      return `${rot}: ${!v ? 'Não' : ehData(v) ? brData(v) : v}`;
+    }).join('\n');
+    const cert = c.cd.map((v, i) => `${CERTIDOES[i]}: ${certidao(v).texto}`).join('\n');
+    const i = c.ins || {};
+    const f = c.fo || {};
+    const ou = (v) => (v === null || v === undefined || v === '' ? '—' : ehData(v) ? brData(v) : v);
+    return [
+      `#${c.id} ${c.n}`,
+      `CNPJ: ${c.j ? brCnpj(c.j) : '—'}`,
+      `Regime: ${ou(c.rg)}`,
+      `Cidade: ${ou(c.ci)}`,
+      `Responsável Onvio: ${ou(c.r)}`,
+      `Certificado digital: ${c._cf.texto}`,
+      '',
+      'INSCRIÇÕES',
+      `CACEAL: ${ou(i.ca)}`,
+      `Inscrição municipal: ${ou(i.im)}`,
+      `NIRE: ${ou(i.ni)}`,
+      `Arquivamento JUCEAL: ${ou(i.aj)}`,
+      `Próximo arquivamento: ${ou(i.pa)}`,
+      '',
+      'PROCURAÇÕES',
+      proc,
+      '',
+      'FOLHA',
+      `Responsável DP: ${ou(f.rp)}`,
+      `Tem folha: ${f.po ? 'Sim' : 'Não'}`,
+      `Colaboradores 2023/2024: ${ou(f.c23)} / ${ou(f.c24)}`,
+      `Pró-labore 2023/2024: ${ou(f.p23)} / ${ou(f.p24)}`,
+      '',
+      'CERTIDÕES',
+      cert,
+      '',
+      'Origem: CONTROLE_CORRETO_5.xlsx — dado de cadastro, não consulta ao portal.',
+    ].join('\n');
+  }
+
+  // Colado direto no Excel: uma coluna por tabulação.
+  function tabela(clientes) {
+    const cab = ['ID', 'Cliente', 'CNPJ', 'Cidade', 'Regime', 'Responsável', 'Certificado', 'Situação']
+      .concat(CERTIDOES);
+    const linhas = clientes.map((c) =>
+      [
+        c.id ?? '',
+        c.n,
+        c.j ? brCnpj(c.j) : '',
+        c.ci ?? '',
+        c.rg ?? '',
+        c.r ?? '',
+        c._cf.texto,
+        c._e.rotulo,
+      ]
+        .concat(c.cd.map((v) => certidao(v).texto))
+        .join('\t')
+    );
+    return [cab.join('\t')].concat(linhas).join('\n');
+  }
+
+  document.addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-copiar]');
+    if (!b) return;
+    const c = CLIENTES.find((x) => x.id === selecionado);
+    const quais = {
+      cnpj: () => (c?.j ? brCnpj(c.j) : ''),
+      ficha: () => (c ? fichaTexto(c) : ''),
+      lista: () => tabela(CLIENTES.filter(passa)),
+      'lista-sem-procuracao': () => tabela(CLIENTES.filter((x) => x._e.chave === 'sem-procuracao')),
+      'lista-certificado': () => tabela(CLIENTES.filter((x) => x._cf.estado === 'vencido')),
+      'lista-det': () => tabela(CLIENTES.filter((x) => !x.det)),
+      'lista-responsavel': () => tabela(CLIENTES.filter((x) => !x.r)),
+    };
+    const texto = quais[b.dataset.copiar]?.();
+    if (texto) copiar(texto, b);
+  });
 
   /* ---------- Navegação entre telas ---------- */
   const TELAS = {

@@ -38,7 +38,26 @@ function validade(p) {
   return p.validade || 'sem validade';
 }
 
+// Todas as procurações da planilha, não só as duas do e-CAC: a ficha do
+// cliente na tela é o cadastro dele, e o pessoal do escritório precisa
+// consultar Conectividade, Empregador Web e Gestão de Demandas do mesmo lugar.
+const PROCURACOES = {
+  ecacE: 'ecacEscritorio',
+  ecacR: 'ecacResponsavel',
+  fgtsE: 'fgtsEscritorio',
+  fgtsR: 'fgtsResponsavel',
+  empWeb: 'empregadorWeb',
+  conect: 'conectividade',
+  gestao: 'gestaoDemandas',
+  det: 'det',
+};
+
 function enxugar(c) {
+  const pg = {};
+  for (const [curto, longo] of Object.entries(PROCURACOES)) {
+    pg[curto] = validade(c.procuracoes?.[longo]);
+  }
+
   return {
     id: c.id ?? null,
     n: c.nome,
@@ -47,12 +66,29 @@ function enxugar(c) {
     rg: c.regime || null,
     r: c.responsavelOnvio || null,
     cv: c.certificadoVence || null,
-    pe: validade(c.procuracoes?.ecacEscritorio),
-    pr: validade(c.procuracoes?.ecacResponsavel),
-    det: Boolean(c.procuracoes?.det?.tem),
-    fgd: Boolean(c.procuracoes?.fgtsEscritorio?.tem || c.procuracoes?.fgtsResponsavel?.tem),
+    // Atalhos que o painel usa em contagem e filtro; saem de pg.
+    pe: pg.ecacE,
+    pr: pg.ecacR,
+    det: Boolean(pg.det),
+    fgd: Boolean(pg.fgtsE || pg.fgtsR),
+    pg,
+    // Inscrições e registros: é o que se procura na ficha, não no painel.
+    ins: {
+      ca: c.caceal || null,
+      im: c.inscricaoMunicipal || null,
+      ni: c.nire || null,
+      aj: c.arquivamentoJucea || null,
+      pa: c.proximoArquivamento || null,
+    },
+    fo: {
+      rp: c.folha?.responsavel || null,
+      po: Boolean(c.folha?.possui),
+      c23: c.folha?.colaboradores2023 ?? null,
+      p23: c.folha?.proLabore2023 ?? null,
+      c24: c.folha?.colaboradores2024 ?? null,
+      p24: c.folha?.proLabore2024 ?? null,
+    },
     cd: ORDEM_CERTIDOES.map((k) => certidao(c.certidoes?.[k])),
-    fo: c.folha?.possui ? c.folha.colaboradores2024 ?? null : null,
   };
 }
 

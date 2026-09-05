@@ -295,6 +295,25 @@
     .placa-duvida { grid-template-columns: minmax(0, 1fr); }
   }
 
+  /* Ficha do cliente: seções separadas por filete, não por espaço vazio. */
+  .secao + .secao { border-top: 1px solid var(--linha); }
+  .secao .sub-rot { margin-top: 0; }
+
+  /* Campo em branco tem que parecer em branco, não parecer zero. */
+  .nulo { color: var(--texto-3, var(--texto-2)); opacity: .65; font-style: italic; }
+
+  /* Listas operacionais do Relatórios: número, o que é, e o botão que copia. */
+  .listas { display: flex; flex-direction: column; gap: 6px; }
+  .lista {
+    display: grid;
+    grid-template-columns: 3.2ch minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+  }
+  .lista .n { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .lista .rot { font-size: 12px; color: var(--texto-2); }
+  .lista .botao { padding: 3px 9px; font-size: 10.5px; }
+
   .grade-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
 
   /* Matriz de certidões: uma coluna por órgão. */
@@ -801,11 +820,6 @@
         <button class="acao" type="button" data-filtro="certificado" aria-pressed="false">Certificado <span class="qtd"></span></button>
         <button class="acao" type="button" data-filtro="certidoes" aria-pressed="false">Certidão impedida <span class="qtd"></span></button>
         <button class="acao" type="button" data-filtro="det" aria-pressed="false">Sem DET <span class="qtd"></span></button>
-        <span class="divisor"></span>
-        <button class="acao" type="button">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-          Período
-        </button>
       </div>
 
       <div class="estado-topo">
