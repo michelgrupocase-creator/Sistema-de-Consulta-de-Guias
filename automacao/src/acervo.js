@@ -194,6 +194,56 @@ export class Acervo {
     return { tentados: fila.length, enviados };
   }
 
+  /**
+   * A linha do tempo de um documento: cada coleta que trouxe conteúdo
+   * diferente, mais quantas vezes ele foi conferido sem mudar entre uma e
+   * outra. É a diferença entre "temos 12 PDFs" e "mudou 3 vezes em 12
+   * conferências" — a segunda é informação, a primeira é armazenamento.
+   */
+  historico(cnpj, tipo) {
+    const j = digitos(cnpj);
+    return this.indice.documentos
+      .filter((d) => d.cnpj === j && d.tipo === tipo)
+      .sort((a, b) => a.coletadoEm.localeCompare(b.coletadoEm))
+      .map((d, i) => ({
+        em: d.coletadoEm,
+        ate: d.conferidoEm,
+        conferencias: 1 + (d.vistoEm?.length ?? 0),
+        mudou: i > 0,
+        caminho: d.caminho,
+        link: d.link ?? null,
+        bytes: d.bytes,
+      }));
+  }
+
+  /**
+   * O que mudou desde uma data, na carteira inteira. É a pergunta que o
+   * escritório faz de manhã — e a única que justifica automatizar a coleta,
+   * porque "baixar 112 PDFs" só troca trabalho manual por leitura manual.
+   */
+  mudancasDesde(desde) {
+    const corte = typeof desde === 'string' ? desde : new Date(desde).toISOString();
+    return this.indice.documentos
+      .filter((d) => d.mudou && d.coletadoEm >= corte)
+      .sort((a, b) => b.coletadoEm.localeCompare(a.coletadoEm))
+      .map((d) => ({
+        cnpj: d.cnpj,
+        apelido: d.apelido,
+        tipo: d.tipo,
+        rotulo: d.rotulo,
+        em: d.coletadoEm,
+        caminho: d.caminho,
+        link: d.link ?? null,
+        anterior: d.anterior,
+      }));
+  }
+
+  /** Quando foi a última coleta de qualquer coisa. */
+  ultimaColeta() {
+    const datas = this.indice.documentos.map((d) => d.conferidoEm).filter(Boolean);
+    return datas.length ? datas.sort().pop() : null;
+  }
+
   /** Um resumo por cliente, para o sistema exibir. */
   porCliente() {
     const mapa = new Map();

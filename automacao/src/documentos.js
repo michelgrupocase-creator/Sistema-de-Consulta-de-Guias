@@ -52,6 +52,8 @@ function main(argv) {
           versoes: d.versoes,
           mudou: d.mudou,
           onde: d.caminho,
+          link: d.link ?? null,
+          pendente: Boolean(d.pendente),
         };
       }
       const resumo = Object.entries(ficha)
@@ -60,15 +62,33 @@ function main(argv) {
       console.log(`  ${cnpj}  ${resumo}`);
 
       if (saidaJson) {
+        // Além da ficha (estado atual), vai a linha do tempo — é dela que a
+        // tela tira "o que mudou", que é a pergunta do escritório de manhã.
+        const hist = {};
+        for (const tipo of Object.keys(tipos)) {
+          hist[tipo] = acervo.historico(cnpj, tipo).map((m) => ({
+            em: m.em.slice(0, 10),
+            conferencias: m.conferencias,
+            mudou: m.mudou,
+            link: m.link,
+          }));
+        }
         await fs.writeFile(
           path.join(pasta, `${cnpj}.json`),
-          JSON.stringify(ficha, null, 1),
+          JSON.stringify({ doc: ficha, hist }, null, 1),
           'utf8'
         );
       }
     }
 
     console.log('\n* = o documento mudou em relação à coleta anterior.');
+
+    const recentes = acervo.mudancasDesde(new Date(Date.now() - 30 * 86400000).toISOString());
+    console.log(
+      recentes.length
+        ? `\nMudaram nos últimos 30 dias: ${recentes.length} documento(s).`
+        : '\nNada mudou nos últimos 30 dias.'
+    );
     if (saidaJson) console.log(`\nFichas em ${path.relative(RAIZ, pasta)}/ — carregue no sistema a partir daí.`);
     else console.log('\nUse --json para gerar os arquivos de carga.');
   })();

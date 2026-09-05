@@ -445,6 +445,47 @@
       }</p>`;
   }
 
+  // A linha do tempo mostra MARCOS, não coletas: cada vez que o documento
+  // mudou, e quantas conferências passaram sem mudar entre uma e outra.
+  // "12 PDFs" é armazenamento; "mudou 3 vezes em 12 conferências" é informação.
+  function linhaDoTempo(c) {
+    const hist = c.hist || {};
+    const tipos = Object.keys(hist).filter((k) => (hist[k] || []).length);
+    if (!tipos.length) return '';
+
+    const blocos = tipos
+      .map((k) => {
+        const marcos = hist[k];
+        const rot = (DOCUMENTOS.find(([t]) => t === k) || [k, k])[1];
+        const linhas = marcos
+          .slice()
+          .reverse()
+          .map(
+            (m) => `<li class="marco ${m.mudou ? 'mudou' : ''}">
+              <span class="marco-data">${brData(String(m.em).slice(0, 10))}</span>
+              <span class="marco-txt">
+                ${m.mudou ? '<b>Mudou</b>' : 'Primeira coleta'}
+                ${m.conferencias > 1 ? `<span class="nulo"> · conferido ${m.conferencias}×</span>` : ''}
+              </span>
+              ${m.link ? `<a class="elo-doc" href="${escapar(m.link)}" target="_blank" rel="noopener">Abrir</a>` : ''}
+            </li>`
+          )
+          .join('');
+        const mudancas = marcos.filter((m) => m.mudou).length;
+        const conferencias = marcos.reduce((n, m) => n + m.conferencias, 0);
+        return `<div class="trilha-doc">
+          <p class="eyebrow">${escapar(rot)} — ${mudancas} mudança${mudancas === 1 ? '' : 's'} em ${conferencias} conferência${conferencias === 1 ? '' : 's'}</p>
+          <ul class="marcos">${linhas}</ul>
+        </div>`;
+      })
+      .join('');
+
+    return `<section class="cartao">
+      <div class="cartao-topo"><h2>Linha do tempo</h2><span class="dica">só o que mudou</span></div>
+      <div class="cartao-corpo">${blocos}</div>
+    </section>`;
+  }
+
   function desenharFicha() {
     const alvo = $('ficha');
     const c = CLIENTES.find((x) => x.id === selecionado);
@@ -547,6 +588,8 @@
           </div>
           <div class="cartao-corpo">${documentosGuardados(c)}</div>
         </section>
+
+        ${linhaDoTempo(c)}
       </div>`;
   }
 
@@ -841,6 +884,45 @@
     </button>`;
   }
 
+  // O cartão que justifica automatizar a coleta. Sem ele o sistema mostra
+  // estado; com ele mostra movimento — e é movimento que exige ação.
+  function desenharMudancas() {
+    const alvo = $('mudancas');
+    if (!alvo) return;
+
+    // Cada cliente carrega as mudanças dele; aqui juntamos a carteira toda.
+    const todas = [];
+    CLIENTES.forEach((c) => {
+      Object.entries(c.hist || {}).forEach(([tipo, marcos]) => {
+        (marcos || []).forEach((m) => {
+          if (m.mudou) todas.push({ c, tipo, ...m });
+        });
+      });
+    });
+    todas.sort((a, b) => String(b.em).localeCompare(String(a.em)));
+
+    if (!todas.length) {
+      alvo.innerHTML = `<p class="nota" style="margin:0">Nada mudou ainda — a coleta automática não rodou.
+        Quando rodar, esta lista mostra o que virou pendência nova desde a conferência anterior,
+        que é a pergunta que o escritório faz de manhã.</p>`;
+      return;
+    }
+
+    alvo.innerHTML = `<ul class="mudancas">${todas
+      .slice(0, 12)
+      .map((m) => {
+        const rot = (DOCUMENTOS.find(([t]) => t === m.tipo) || [m.tipo, m.tipo])[1];
+        return `<li>
+          <span class="quando">${brData(String(m.em).slice(0, 10))}</span>
+          <button class="elo" type="button" data-abrir="${escapar(m.c.id)}">${escapar(capitular(m.c.n))}</button>
+          <span class="nulo">${escapar(rot)}</span>
+          ${m.link ? `<a class="elo-doc" href="${escapar(m.link)}" target="_blank" rel="noopener">Abrir</a>` : ''}
+        </li>`;
+      })
+      .join('')}</ul>
+      ${todas.length > 12 ? `<p class="nota">e mais ${todas.length - 12}.</p>` : ''}`;
+  }
+
   function desenharPainel() {
     $('m-prioridade').innerHTML = contadores([
       [conta(FILTROS['sem-procuracao'].fn), 'Sem procuração e-CAC', 'alerta', 'sem-procuracao'],
@@ -997,7 +1079,7 @@
   /* ---------- Navegação ---------- */
 
   const TELAS = {
-    painel: () => { desenharPainel(); desenharTabela(); },
+    painel: () => { desenharPainel(); desenharMudancas(); desenharTabela(); },
     clientes: () => desenharClientes(),
     ficha: () => desenharFicha(),
     certidoes: () => desenharCertidoes(),
@@ -1081,6 +1163,9 @@
 
     const ir = t.closest('[data-vista-ir]');
     if (ir) return irPara(ir.dataset.vistaIr);
+
+    const ab = t.closest('[data-abrir]');
+    if (ab) { selecionado = ab.dataset.abrir; return irPara('ficha'); }
 
     // Clicar num cliente, em qualquer tabela, salta para a ficha dele.
     const tr = t.closest('tr[data-id]');
