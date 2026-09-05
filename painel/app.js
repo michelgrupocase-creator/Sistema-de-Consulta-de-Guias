@@ -417,17 +417,32 @@
           : idade <= 7 ? '<span class="selo limpo">Atual</span>'
           : idade <= 30 ? `<span class="selo falha">${idade} dias</span>`
           : `<span class="selo nova">${idade} dias</span>`;
+        // Com Drive, o documento é um link que abre o PDF de qualquer máquina.
+        // Sem Drive, só dá para dizer onde ele está na máquina da coleta.
+        const alvo = d.link
+          ? `<a class="elo-doc" href="${escapar(d.link)}" target="_blank" rel="noopener">
+               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+               Abrir PDF
+             </a>`
+          : d.pendente
+            ? `<span class="selo falha">Só na máquina da coleta</span>`
+            : `<span class="nulo" style="font-size:11px;font-family:var(--mono)">${escapar(d.onde || '')}</span>`;
+
         return `<dt>${escapar(d.rotulo || rot)}</dt>
           <dd>${brData(d.em)} ${selo}
             ${d.versoes > 1 ? `<span class="nulo"> · ${d.versoes} versões</span>` : ''}
-            <div class="nulo" style="font-size:11px;font-family:var(--mono)">${escapar(d.onde || '')}</div>
+            <div style="margin-top:3px">${alvo}</div>
           </dd>`;
       })
       .join('');
 
+    const temLink = guardados.some(([k]) => acervo[k].link);
     return `<dl class="ficha">${linhas}</dl>
-      <p class="nota">O arquivo fica na máquina que roda a coleta, no caminho acima.
-      Relatório de situação fiscal é dado sob sigilo — ele não trafega para esta tela.</p>`;
+      <p class="nota">${
+        temLink
+          ? 'Os documentos ficam no Drive do escritório. Abrem de qualquer máquina, para quem tem acesso à pasta.'
+          : 'Sem Drive configurado, o arquivo existe só na máquina que rodou a coleta.'
+      }</p>`;
   }
 
   function desenharFicha() {

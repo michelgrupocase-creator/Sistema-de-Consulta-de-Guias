@@ -16,5 +16,20 @@
   "esperaEntreEmpresasMs": 4000,
   "tentativasPorEmpresa": 2,
   "timeoutPadraoMs": 60000,
-  "timeoutRelatorioMs": 240000
+  "timeoutRelatorioMs": 240000,
+  "acervo": "./acervo",
+  "drive": {
+    "_comentario": "Armazenamento na nuvem. ativo=false roda só local.",
+    "ativo": false,
+    "modo": "oauth",
+    "_modo": "oauth = autoriza no navegador com a conta do escritorio (funciona em Gmail comum). conta-de-servico = chave de robo, exige Drive Compartilhado do Workspace.",
+    "clientId": "",
+    "clientSecret": "",
+    "refreshEnv": "DRIVE_REFRESH_TOKEN",
+    "chavePath": "./cert/drive-conta-de-servico.json",
+    "driveId": "",
+    "_driveId": "Id do Drive Compartilhado. Deixe vazio no modo oauth.",
+    "pastaRaizId": "",
+    "_pastaRaizId": "Id da pasta do acervo no Drive: abra a pasta e copie o codigo do fim da URL."
+  }
 }

@@ -208,6 +208,52 @@ npm run documentos            # o que está guardado, por cliente
 npm run documentos -- --json  # fichas para carregar no sistema
 ```
 
+#### Google Drive: o acervo que a equipe inteira enxerga
+
+O acervo local resolve o histórico, mas morre com a máquina: quem está em casa
+não vê o PDF que o computador do escritório baixou. Com o Drive ligado, o mesmo
+acervo é espelhado na nuvem e o sistema mostra um **link que abre o documento**.
+
+A ordem nunca muda: **grava local primeiro, sobe depois.** Internet caindo no
+meio não perde arquivo — a subida entra numa fila que a próxima execução
+esvazia sozinha. Drive fora do ar não interrompe a coleta.
+
+Dois modos, e a escolha depende do tipo de conta Google:
+
+| Modo | Quando usar | Como |
+|---|---|---|
+| `oauth` | conta **Gmail comum** | autoriza uma vez no navegador; os arquivos ficam no Drive dessa conta e consomem o espaço dela |
+| `conta-de-servico` | **Google Workspace** com Drive Compartilhado | chave de robô, sem navegador, sem token para renovar |
+
+> **Atenção:** conta de serviço **não funciona** jogando numa pasta do "Meu
+> Drive" de um Gmail comum. O arquivo ficaria sob a conta de serviço, que não
+> tem cota, e a subida falha com *"Service Accounts do not have storage
+> quota"*. Nesse caso use `oauth`.
+
+Configuração no modo `oauth`:
+
+1. No [Google Cloud Console](https://console.cloud.google.com): **APIs e
+   Serviços → Biblioteca → Google Drive API → Ativar**.
+2. **Credenciais → Criar credenciais → ID do cliente OAuth → Aplicativo para
+   computador.** Anote client id e secret.
+3. No Drive, crie a pasta do acervo e copie o id do fim da URL.
+4. Preencha `drive` no `config.json` e ligue `"ativo": true`.
+5. Rode uma vez:
+
+```bash
+npm run drive-autorizar
+export DRIVE_REFRESH_TOKEN='...'    # o comando imprime; guarde em variável
+```
+
+O token dá acesso ao Drive do escritório — **variável de ambiente, nunca
+arquivo do projeto.** O escopo pedido é `drive.file`: o robô só enxerga o que
+ele mesmo criou, não a sua pasta pessoal.
+
+**Antes de ligar, decida uma coisa:** relatório de situação fiscal é dado sob
+sigilo fiscal de terceiro. Pôr no Drive é prática comum em escritório
+contábil, mas é uma decisão sua, não minha. Se for, use uma pasta dedicada,
+com acesso restrito à equipe — não a pasta que já é compartilhada com clientes.
+
 O **PDF não sobe para o sistema**: fica na máquina que rodou a coleta. Para a
 tela vai só a *ficha* do documento — que tipo, de quando, quantas versões, se
 mudou e onde está. Relatório de situação fiscal de terceiro é sigilo fiscal;

@@ -10,6 +10,7 @@ import {
 } from './config.js';
 import { abrirNavegador, salvarDebug } from './navegador.js';
 import { abrirAcervo } from './acervo.js';
+import { abrirDrive } from './drive.js';
 import {
   baixarRelatorioPendencias,
   entrar,
@@ -196,7 +197,23 @@ async function main() {
   await fs.mkdir(pastaDoDia, { recursive: true });
 
   // O acervo é o que sobrevive: pasta por cliente, histórico por tipo.
-  const acervo = await abrirAcervo(path.resolve(RAIZ, config.acervo ?? './acervo'));
+  // Com Drive configurado, o mesmo acervo também espelha para a nuvem — é o
+  // que faz quem está em casa enxergar o PDF baixado no escritório.
+  let remoto = null;
+  if (config.drive?.ativo) {
+    try {
+      remoto = await abrirDrive(config.drive);
+      console.log('Drive conectado.');
+    } catch (e) {
+      // Drive fora do ar não pode impedir a coleta: o acervo local segue.
+      console.error(`Drive indisponível (${e.message}). A coleta continua local.`);
+    }
+  }
+  const acervo = await abrirAcervo(path.resolve(RAIZ, config.acervo ?? './acervo'), remoto);
+
+  // Antes de coletar, esvazia o que ficou preso de execuções anteriores.
+  const fila = await acervo.reenviarPendentes();
+  if (fila.tentados) console.log(`Pendências do Drive: ${fila.enviados}/${fila.tentados} enviadas.`);
 
   console.log(`\n${empresas.length} empresa(s) em ${grupos.size} certificado(s).`);
   console.log(`Saída: ${path.relative(RAIZ, pastaDoDia)}`);

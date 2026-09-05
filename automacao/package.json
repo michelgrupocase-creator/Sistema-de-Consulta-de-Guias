@@ -11,10 +11,12 @@
     "mapear": "node src/mapear.js",
     "planilha": "node src/planilha.js",
     "painel": "node src/painel.js",
-    "documentos": "node src/documentos.js"
+    "documentos": "node src/documentos.js",
+    "drive-autorizar": "node src/drive-autorizar.js"
   },
   "dependencies": {
     "exceljs": "^4.4.0",
+    "googleapis": "^178.0.0",
     "playwright": "^1.49.0"
   },
   "engines": {

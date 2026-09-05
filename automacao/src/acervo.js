@@ -23,6 +23,11 @@
  * 1. NADA É SOBRESCRITO. Documento fiscal é prova. Se dois arquivos do mesmo
  *    dia forem diferentes, o segundo vira `-2`, e os dois ficam.
  *
+ * O acervo pode ter um DESTINO REMOTO (Google Drive). A ordem é sempre a
+ * mesma: grava local primeiro, sobe depois. Se a internet cair no meio, o
+ * documento já está salvo e a subida entra na fila da próxima execução — o
+ * contrário perderia o arquivo.
+ *
  * 2. ARQUIVO IDÊNTICO NÃO VIRA CÓPIA NOVA. Se o PDF de hoje tem o mesmo
  *    SHA-256 do último guardado, o acervo registra "visto de novo em tal dia"
  *    em vez de duplicar. Assim o histórico mostra MUDANÇA, não repetição —
@@ -51,10 +56,11 @@ const hoje = () => new Date().toISOString().slice(0, 10);
 const sha256 = (buf) => crypto.createHash('sha256').update(buf).digest('hex');
 
 export class Acervo {
-  constructor(raiz) {
+  constructor(raiz, remoto = null) {
     this.raiz = path.resolve(raiz);
     this.caminhoIndice = path.join(this.raiz, '_indice.json');
     this.indice = null;
+    this.remoto = remoto; // opcional: Drive
   }
 
   async abrir() {
@@ -139,7 +145,53 @@ export class Acervo {
     };
     this.indice.documentos.push(registro);
     await this.salvarIndice();
+
+    // Local está seguro. Agora tenta o remoto; falhar aqui não perde nada.
+    await this.subir(registro);
+    await this.salvarIndice();
+
     return { estado: 'novo', ...registro };
+  }
+
+  /**
+   * Sobe um registro para o destino remoto. Falha vira pendência, não erro:
+   * a coleta não pode parar porque a internet oscilou.
+   */
+  async subir(registro) {
+    if (!this.remoto) return registro;
+    if (registro.remotoId) return registro; // já está lá
+    try {
+      const r = await this.remoto.subir({
+        caminhoLocal: path.join(this.raiz, registro.caminho),
+        cnpj: registro.cnpj,
+        tipo: registro.tipo,
+        nome: path.basename(registro.caminho),
+      });
+      registro.remotoId = r.id;
+      registro.link = r.link;
+      registro.pendente = false;
+      delete registro.erroEnvio;
+    } catch (e) {
+      registro.pendente = true;
+      registro.erroEnvio = e.message;
+    }
+    return registro;
+  }
+
+  /**
+   * Reenvia tudo que ficou para trás. Rodar isto no começo de cada coleta é
+   * o que faz uma queda de internet virar atraso em vez de buraco.
+   */
+  async reenviarPendentes() {
+    if (!this.remoto) return { tentados: 0, enviados: 0 };
+    const fila = this.indice.documentos.filter((d) => d.pendente && !d.remotoId);
+    let enviados = 0;
+    for (const d of fila) {
+      await this.subir(d);
+      if (d.remotoId) enviados += 1;
+    }
+    if (fila.length) await this.salvarIndice();
+    return { tentados: fila.length, enviados };
   }
 
   /** Um resumo por cliente, para o sistema exibir. */
@@ -157,6 +209,8 @@ export class Acervo {
           conferidoEm: d.conferidoEm,
           mudou: d.mudou,
           bytes: d.bytes,
+          link: d.link ?? null,
+          pendente: Boolean(d.pendente),
           versoes: this.indice.documentos.filter((x) => x.cnpj === d.cnpj && x.tipo === d.tipo).length,
         };
       }
@@ -165,6 +219,6 @@ export class Acervo {
   }
 }
 
-export async function abrirAcervo(raiz) {
-  return new Acervo(raiz).abrir();
+export async function abrirAcervo(raiz, remoto = null) {
+  return new Acervo(raiz, remoto).abrir();
 }
