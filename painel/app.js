@@ -77,6 +77,18 @@
 
   const SEM_VALIDADE = 'sem validade';
 
+  // Documentos que o robô arquiva. O PDF fica na máquina que roda a coleta;
+  // aqui guardamos a ficha dele — o que existe, de quando, e se mudou.
+  const DOCUMENTOS = [
+    ['situacao-fiscal', 'Relatório de Situação Fiscal'],
+    ['cnd-federal', 'CND Federal (RFB/PGFN)'],
+    ['cnd-fgts', 'CRF — FGTS'],
+    ['cnd-trabalhista', 'CNDT — Trabalhista'],
+    ['cnd-estadual', 'Certidão Estadual'],
+    ['cnd-municipal', 'Certidão Municipal'],
+    ['caixa-postal', 'Caixa Postal / DTE'],
+  ];
+
   /* ---------- Leituras de estado ---------- */
 
   function procuracaoECac(c) {
@@ -382,6 +394,42 @@
     return `<span class="selo limpo">Até ${brData(v)}</span>`;
   }
 
+  // O acervo é do robô, e o robô ainda não rodou. Enquanto não houver
+  // documento, esta seção diz isso — em vez de mostrar uma lista vazia que
+  // se confunde com "não tem certidão".
+  function documentosGuardados(c) {
+    const acervo = c.doc || {};
+    const guardados = DOCUMENTOS.filter(([k]) => acervo[k]);
+
+    if (!guardados.length) {
+      return `<p class="nota" style="margin:0">Nenhum documento arquivado ainda para este cliente.
+        O acervo é alimentado pela coleta automática, que só roda depois de os seletores
+        do portal serem calibrados (<code>npm run mapear</code>).</p>`;
+    }
+
+    const linhas = guardados
+      .map(([k, rot]) => {
+        const d = acervo[k];
+        const idade = d.idade ?? null;
+        const selo =
+          d.mudou ? '<span class="selo nova">Mudou</span>'
+          : idade === null ? ''
+          : idade <= 7 ? '<span class="selo limpo">Atual</span>'
+          : idade <= 30 ? `<span class="selo falha">${idade} dias</span>`
+          : `<span class="selo nova">${idade} dias</span>`;
+        return `<dt>${escapar(d.rotulo || rot)}</dt>
+          <dd>${brData(d.em)} ${selo}
+            ${d.versoes > 1 ? `<span class="nulo"> · ${d.versoes} versões</span>` : ''}
+            <div class="nulo" style="font-size:11px;font-family:var(--mono)">${escapar(d.onde || '')}</div>
+          </dd>`;
+      })
+      .join('');
+
+    return `<dl class="ficha">${linhas}</dl>
+      <p class="nota">O arquivo fica na máquina que roda a coleta, no caminho acima.
+      Relatório de situação fiscal é dado sob sigilo — ele não trafega para esta tela.</p>`;
+  }
+
   function desenharFicha() {
     const alvo = $('ficha');
     const c = CLIENTES.find((x) => x.id === selecionado);
@@ -475,6 +523,14 @@
         <section class="cartao">
           <div class="cartao-topo"><h2>Certidões</h2><span class="dica">clique para ver quem mais está assim</span></div>
           <div class="cartao-corpo"><dl class="ficha">${cert}</dl></div>
+        </section>
+
+        <section class="cartao">
+          <div class="cartao-topo">
+            <h2>Documentos guardados</h2>
+            <span class="dica">acervo da coleta</span>
+          </div>
+          <div class="cartao-corpo">${documentosGuardados(c)}</div>
         </section>
       </div>`;
   }

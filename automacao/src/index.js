@@ -9,6 +9,7 @@ import {
   obterSenhas,
 } from './config.js';
 import { abrirNavegador, salvarDebug } from './navegador.js';
+import { abrirAcervo } from './acervo.js';
 import {
   baixarRelatorioPendencias,
   entrar,
@@ -45,8 +46,11 @@ function esperar(ms) {
 }
 
 /** Uma empresa: troca de perfil, gera e salva o relatório. Com retentativa. */
-async function processarEmpresa(page, empresa, config, pastaDoDia, pastaSaida) {
+async function processarEmpresa(page, empresa, config, pastaDoDia, pastaSaida, acervo, nomeCert) {
   const rotulo = `${formatarCnpj(empresa.cnpj)}${empresa.apelido ? ` (${empresa.apelido})` : ''}`;
+  // Baixa para a pasta do dia e, em seguida, arquiva no acervo. A pasta do dia
+  // continua existindo porque é onde se olha "o que rodou hoje"; o acervo é
+  // onde se olha "o histórico deste cliente".
   const destino = path.join(pastaDoDia, nomeArquivo(empresa));
 
   for (let tentativa = 1; tentativa <= config.tentativasPorEmpresa; tentativa += 1) {
@@ -57,8 +61,32 @@ async function processarEmpresa(page, empresa, config, pastaDoDia, pastaSaida) {
         destino,
         config.timeoutRelatorioMs
       );
-      console.log(`  OK      ${rotulo} -> ${path.relative(RAIZ, arquivo)}`);
-      return { cnpj: somenteDigitos(empresa.cnpj), status: 'ok', arquivo };
+      // Arquiva. Se o conteúdo for idêntico ao da última coleta, o acervo
+      // registra "conferido de novo" em vez de duplicar o PDF — é assim que
+      // o histórico passa a mostrar mudança em vez de repetição.
+      const guardado = await acervo.guardar({
+        cnpj: empresa.cnpj,
+        tipo: 'situacao-fiscal',
+        conteudo: await fs.readFile(arquivo),
+        apelido: empresa.apelido ?? null,
+        certificado: nomeCert,
+      });
+
+      const nota =
+        guardado.estado === 'igual'
+          ? `igual ao de ${guardado.desde.slice(0, 10)}`
+          : guardado.mudou
+            ? 'MUDOU desde a última coleta'
+            : 'primeira coleta';
+      console.log(`  OK      ${rotulo} -> ${nota}`);
+
+      return {
+        cnpj: somenteDigitos(empresa.cnpj),
+        status: 'ok',
+        arquivo,
+        acervo: guardado.caminho,
+        mudou: guardado.estado === 'novo' && guardado.mudou,
+      };
     } catch (erro) {
       const ultima = tentativa === config.tentativasPorEmpresa;
       const print = await salvarDebug(
@@ -88,7 +116,7 @@ async function processarEmpresa(page, empresa, config, pastaDoDia, pastaSaida) {
 }
 
 /** Processa um grupo da carteira com um certificado só. */
-async function rodarGrupo(nomeCert, empresas, config, senha, pastaDoDia, pastaSaida) {
+async function rodarGrupo(nomeCert, empresas, config, senha, pastaDoDia, pastaSaida, acervo) {
   console.log(`\n--- Certificado "${nomeCert}" · ${empresas.length} empresa(s) ---`);
 
   const resultados = [];
@@ -117,7 +145,7 @@ async function rodarGrupo(nomeCert, empresas, config, senha, pastaDoDia, pastaSa
 
     for (const [indice, empresa] of empresas.entries()) {
       console.log(`[${indice + 1}/${empresas.length}]`);
-      const r = await processarEmpresa(page, empresa, config, pastaDoDia, pastaSaida);
+      const r = await processarEmpresa(page, empresa, config, pastaDoDia, pastaSaida, acervo, nomeCert);
       resultados.push({ ...r, certificado: nomeCert });
 
       // Ritmo humano entre empresas: rajada de requisições é o jeito mais
@@ -167,13 +195,16 @@ async function main() {
   const pastaDoDia = path.join(pastaSaida, dataDeHoje());
   await fs.mkdir(pastaDoDia, { recursive: true });
 
+  // O acervo é o que sobrevive: pasta por cliente, histórico por tipo.
+  const acervo = await abrirAcervo(path.resolve(RAIZ, config.acervo ?? './acervo'));
+
   console.log(`\n${empresas.length} empresa(s) em ${grupos.size} certificado(s).`);
   console.log(`Saída: ${path.relative(RAIZ, pastaDoDia)}`);
 
   let resultados = [];
   for (const [nomeCert, doGrupo] of grupos) {
     resultados = resultados.concat(
-      await rodarGrupo(nomeCert, doGrupo, config, senhas[nomeCert], pastaDoDia, pastaSaida)
+      await rodarGrupo(nomeCert, doGrupo, config, senhas[nomeCert], pastaDoDia, pastaSaida, acervo)
     );
   }
 

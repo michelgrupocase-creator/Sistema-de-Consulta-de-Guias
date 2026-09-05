@@ -10,3 +10,7 @@ node_modules/
 # Base gerada da planilha de controle — dados de clientes, nunca versionar.
 dados/
 *.xlsx
+
+# Acervo de documentos baixados — situação fiscal e certidões de terceiros.
+# É o material mais sensível do projeto: sigilo fiscal em PDF.
+acervo/

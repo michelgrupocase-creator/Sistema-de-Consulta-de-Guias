@@ -10,7 +10,8 @@
     "instalar-navegador": "playwright install chromium",
     "mapear": "node src/mapear.js",
     "planilha": "node src/planilha.js",
-    "painel": "node src/painel.js"
+    "painel": "node src/painel.js",
+    "documentos": "node src/documentos.js"
   },
   "dependencies": {
     "exceljs": "^4.4.0",

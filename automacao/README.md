@@ -174,6 +174,48 @@ máquina, a partir da planilha.
 > `certidao()` — mas ninguém deve decidir nada por essa tela antes de saber
 > qual das duas é.
 
+### O acervo: onde os documentos ficam guardados
+
+Tudo que o robô baixa é arquivado em `acervo/`, organizado **por cliente e por
+tipo de documento**, com a data no nome do arquivo:
+
+```
+acervo/
+  09629304000197/
+    situacao-fiscal/
+      2026-09-05_situacao-fiscal.pdf
+      2026-09-12_situacao-fiscal.pdf
+    cnd-federal/
+      2026-09-05_cnd-federal.pdf
+  _indice.json
+```
+
+Duas regras que valem mais do que parecem:
+
+1. **Nada é sobrescrito.** Documento fiscal é prova. Dois arquivos diferentes
+   no mesmo dia viram `-2`, e os dois ficam.
+2. **Arquivo idêntico não vira cópia nova.** Se o PDF de hoje tem o mesmo
+   SHA-256 do último guardado, o acervo anota "conferido de novo" em vez de
+   duplicar. Assim o histórico mostra **mudança**, não repetição — e o robô
+   passa a poder dizer *"a situação fiscal da Padaria mudou desde a semana
+   passada"*, que é o que justifica o projeto.
+
+A pasta `relatorios/AAAA-MM-DD/` continua existindo: ela responde "o que rodou
+hoje". O acervo responde "qual é o histórico deste cliente".
+
+```bash
+npm run documentos            # o que está guardado, por cliente
+npm run documentos -- --json  # fichas para carregar no sistema
+```
+
+O **PDF não sobe para o sistema**: fica na máquina que rodou a coleta. Para a
+tela vai só a *ficha* do documento — que tipo, de quando, quantas versões, se
+mudou e onde está. Relatório de situação fiscal de terceiro é sigilo fiscal;
+ele não precisa atravessar a internet para a equipe saber que existe e que
+está velho.
+
+`acervo/` está no `.gitignore`. **Não remova essa linha.**
+
 ---
 
 ## Quando quebrar (e vai quebrar)
