@@ -38,11 +38,42 @@ async function texto(arquivo) {
   const p = new PDFParse({ data: new Uint8Array(fs.readFileSync(arquivo)) });
   const r = await p.getText();
   await p.destroy();
-  return r.text.replace(/\s+/g, ' ');
+  return r.text;   // bruto: as quebras de linha separam os débitos
 }
 
 /** Transforma o texto do relatório em dado. Só o que dá para afirmar. */
-function extrair(t, cnpj) {
+const REGRA_DEBITO = /^(\d{4}-\d{2})\s*-\s*(.+?)\s+((?:\d{2}|\d[ºo°]?\s*TRIM)\/\d{4})\s+(\d{2}\/\d{2}\/\d{4})\s+([\d.,]+(?:\s+[\d.,]+)*)\s+([A-ZÇÃÕÉÍ][A-ZÇÃÕÉÍ\-\/ ]{2,40})$/;
+
+/**
+ * As linhas de débito, uma a uma — é o detalhamento que a ficha mostra.
+ *
+ * O relatório imprime: código da receita, nome, período, vencimento, uma
+ * série de valores e a situação. A quantidade de valores MUDA conforme o
+ * tipo: débito em cobrança traz original, saldo, multa, juros e consolidado;
+ * débito com exigibilidade suspensa traz só dois. Por isso o consolidado é
+ * lido como o ÚLTIMO número da linha, e não por posição fixa.
+ */
+function linhasDeDebito(bruto) {
+  const linhas = [];
+  for (const l of bruto.split(/\r?\n/)) {
+    const m = l.trim().match(REGRA_DEBITO);
+    if (!m) continue;
+    const nums = m[5].split(/\s+/);
+    linhas.push({
+      receita: m[1],
+      nome: m[2].trim(),
+      periodo: m[3].replace(/\s+/g, ' '),
+      vencimento: m[4],
+      original: nums[0],
+      consolidado: nums[nums.length - 1],
+      situacao: m[6].trim(),
+    });
+  }
+  return linhas;
+}
+
+function extrair(bruto, cnpj) {
+  const t = bruto.replace(/\s+/g, ' ');
   const fmt = cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
   if (!t.includes(fmt)) {
     throw new Error(`O PDF não contém o CNPJ ${fmt} — arquivo na pasta errada.`);
@@ -80,6 +111,7 @@ function extrair(t, cnpj) {
       inscricoesDividaAtiva: inscricoes,
     },
     pgfn: pgfnLimpa ? 'sem-pendencia' : 'com-pendencia',
+    linhas: linhasDeDebito(bruto),
   };
 }
 
@@ -109,6 +141,7 @@ function resumo(d, coletadoEm) {
     parcelasEmAtraso: p.parcelasEmAtraso,
     dividaAtiva: p.inscricoesDividaAtiva,
     pgfn: d.pgfn,
+    linhas: d.linhas,
   };
 }
 

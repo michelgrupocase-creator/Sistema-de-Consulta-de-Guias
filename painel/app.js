@@ -158,6 +158,34 @@
     return `<div class="fiscal"><span class="selo ${cls}">${escapar(f.texto)}</span></div>`;
   };
 
+  // O detalhamento: cada débito como o relatório imprime, sem resumir.
+  // "12 débitos" não serve para trabalhar — quem cobra precisa saber qual
+  // tributo, de que competência, vencido quando e quanto está hoje.
+  function detalheFiscal(c) {
+    const linhas = c.sf?.linhas ?? [];
+    if (!linhas.length) return '';
+    const emCobranca = linhas.filter((l) => /DEVEDOR/i.test(l.situacao));
+    const suspensos = linhas.filter((l) => !/DEVEDOR/i.test(l.situacao));
+
+    const bloco = (titulo, itens, cls) => itens.length ? `
+      <div class="detalhe-fiscal">
+        <div class="detalhe-titulo">${titulo} <span>${itens.length}</span></div>
+        <table class="tabela-debitos">
+          <thead><tr><th>Tributo</th><th>Competência</th><th>Vencimento</th><th class="num">Original</th><th class="num">Hoje</th></tr></thead>
+          <tbody>${itens.map((l) => `<tr>
+            <td><span class="selo ${cls}">${escapar(l.nome)}</span> <span class="codigo">${escapar(l.receita)}</span></td>
+            <td>${escapar(l.periodo)}</td>
+            <td>${escapar(l.vencimento)}</td>
+            <td class="num">${escapar(l.original)}</td>
+            <td class="num forte">${escapar(l.consolidado)}</td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>` : '';
+
+    return bloco('Em cobrança', emCobranca, 'nova')
+      + bloco('Exigibilidade suspensa ou a vencer', suspensos, 'falha');
+  }
+
   function estadoCliente(c) {
     const p = procuracaoECac(c);
     const cf = certificado(c);
@@ -224,6 +252,14 @@
     certificado: { rot: 'Certificado com problema', fn: (c) => ['vencido', 'vence', 'sem'].includes(c._cf.estado) },
     certidoes: { rot: 'Certidão impedida', fn: (c) => (c.cd || []).some((v) => certidao(v).estado === 'impedida') },
     det: { rot: 'Sem DET', fn: (c) => !c.pg?.det },
+
+    // Filtros da situação fiscal. Existem porque cada contador do painel é
+    // um botão, e botão que não filtra nada é maquete — a regra do projeto.
+    'fis-pendencia': { rot: 'Com pendência na Receita', fn: (c) => c.sf?.resultado === 'com-pendencia' },
+    'fis-limpa': { rot: 'Sem pendência na Receita', fn: (c) => c.sf?.resultado === 'sem-pendencia' },
+    'fis-divida': { rot: 'Com dívida ativa', fn: (c) => (c.sf?.dividaAtiva ?? 0) > 0 },
+    'fis-parcelamento': { rot: 'Em parcelamento', fn: (c) => Boolean(c.sf?.emParcelamento) },
+    'fis-sem-consulta': { rot: 'Nunca consultadas na Receita', fn: (c) => !c.sf },
 
     'proc-vencida': { rot: 'Procuração vencida', fn: (c) => c._p.estado === 'vencida' },
     'proc-vence': { rot: 'Procuração vence em 90 dias', fn: (c) => c._p.estado === 'vence' },
@@ -568,6 +604,7 @@
               <dt>Cadastro na Receita</dt>
               <dd>${c.sf?.situacaoCadastral ? escapar(c.sf.situacaoCadastral) : nulo('não consultado')}</dd>
             </dl>
+            ${detalheFiscal(c)}
           </div>
         </section>`;
 
@@ -988,6 +1025,90 @@ ${blocoFiscal}
       ${todas.length > 12 ? `<p class="nota">e mais ${todas.length - 12}.</p>` : ''}`;
   }
 
+  /* ---------- Situação fiscal da carteira ---------- */
+
+  // Os valores vêm do PDF como "1.234,56". Aqui viram número para poder somar
+  // e ordenar. Valor ilegível vira 0 e NÃO derruba o total — mas também não
+  // inventa: o que não foi consultado simplesmente não entra na conta.
+  const emNumero = (v) => {
+    const n = Number(String(v ?? '').replace(/\./g, '').replace(',', '.'));
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  const emReais = (n) =>
+    n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+
+  /** Separa o que é cobrança de hoje do que é compromisso a vencer. */
+  function contasDoCliente(c) {
+    const linhas = c.sf?.linhas ?? [];
+    const cobranca = linhas.filter((l) => /DEVEDOR/i.test(l.situacao));
+    const futuro = linhas.filter((l) => !/DEVEDOR/i.test(l.situacao));
+    return {
+      consultado: Boolean(c.sf),
+      comPendencia: c.sf?.resultado === 'com-pendencia',
+      qtdCobranca: cobranca.length,
+      dividaAtiva: c.sf?.dividaAtiva ?? 0,
+      parcelamento: Boolean(c.sf?.emParcelamento),
+      valorCobranca: cobranca.reduce((t, l) => t + emNumero(l.consolidado), 0),
+      valorFuturo: futuro.reduce((t, l) => t + emNumero(l.consolidado), 0),
+    };
+  }
+
+  function desenharFiscal() {
+    const dados = CLIENTES.map((c) => ({ c, x: contasDoCliente(c) }));
+    const consultados = dados.filter((d) => d.x.consultado);
+    const comPend = consultados.filter((d) => d.x.comPendencia);
+
+    $('fis-cobertura').textContent =
+      `${consultados.length} de ${CLIENTES.length} consultadas`;
+
+    $('fis-numeros').innerHTML = contadores([
+      [comPend.length, 'Com pendência', 'alerta', 'fis-pendencia'],
+      [consultados.length - comPend.length, 'Sem pendência', 'bom', 'fis-limpa'],
+      [consultados.filter((d) => d.x.dividaAtiva > 0).length, 'Com dívida ativa', 'alerta', 'fis-divida'],
+      [consultados.filter((d) => d.x.parcelamento).length, 'Em parcelamento', 'aviso', 'fis-parcelamento'],
+      [CLIENTES.length - consultados.length, 'Nunca consultadas', 'zero', 'fis-sem-consulta'],
+    ]);
+
+    const totalCobranca = consultados.reduce((t, d) => t + d.x.valorCobranca, 0);
+    const totalFuturo = consultados.reduce((t, d) => t + d.x.valorFuturo, 0);
+
+    // O total é da amostra consultada, e a tela diz isso. Apresentar como se
+    // fosse da carteira inteira seria mentir por omissão: falta consultar a
+    // maior parte dela.
+    $('fis-dinheiro').innerHTML = `
+      <div class="dinheiro">
+        <span class="rot">Em cobrança hoje</span>
+        <strong class="alerta">${emReais(totalCobranca)}</strong>
+      </div>
+      <div class="dinheiro">
+        <span class="rot">Suspenso ou a vencer</span>
+        <strong>${emReais(totalFuturo)}</strong>
+      </div>
+      <p class="ressalva">Somado apenas sobre as ${consultados.length} empresas já consultadas${
+        CLIENTES.length - consultados.length
+          ? ` — faltam ${CLIENTES.length - consultados.length}`
+          : ''
+      }.</p>`;
+
+    const ordenado = comPend.sort((a, b) =>
+      b.x.valorCobranca - a.x.valorCobranca || b.x.qtdCobranca - a.x.qtdCobranca);
+
+    $('linhas-pendencia').innerHTML = ordenado.length
+      ? ordenado.map(({ c, x }) => `<tr tabindex="0" data-id="${escapar(c.id)}">
+          <td class="id">${escapar(c.id)}</td>
+          <td class="empresa">
+            <div class="nome">${escapar(capitular(c.n))}</div>
+            <div class="cnpj">${brCnpj(c.j) || 'sem CNPJ'}</div>
+          </td>
+          <td class="dir">${x.qtdCobranca || '—'}</td>
+          <td class="dir">${x.dividaAtiva || '—'}</td>
+          <td class="dir forte">${x.valorCobranca ? emReais(x.valorCobranca) : '—'}</td>
+          <td class="campo">${c.sf?.consultadoEm ? brData(String(c.sf.consultadoEm).slice(0, 10)) : '—'}</td>
+        </tr>`).join('')
+      : `<tr><td colspan="6" class="vazio">Nenhuma empresa com pendência entre as consultadas.</td></tr>`;
+  }
+
   function desenharPainel() {
     $('m-prioridade').innerHTML = contadores([
       [conta(FILTROS['sem-procuracao'].fn), 'Sem procuração e-CAC', 'alerta', 'sem-procuracao'],
@@ -1008,6 +1129,8 @@ ${blocoFiscal}
       barra('Procuração no e-CNPJ do escritório', conta(FILTROS['ecac-escritorio'].fn), '', 'ecac-escritorio') +
       barra('Procuração no e-CPF do responsável', conta(FILTROS['ecac-responsavel'].fn), '', 'ecac-responsavel') +
       barra('Sem DET', conta(FILTROS.det.fn), 'alerta', 'det');
+
+    desenharFiscal();
 
     document.querySelectorAll('.acao[data-filtro]').forEach((b) => {
       const alvo = b.querySelector('.qtd');

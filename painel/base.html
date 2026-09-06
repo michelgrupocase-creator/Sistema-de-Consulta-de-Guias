@@ -355,6 +355,19 @@
     width: 7px; height: 7px; border-radius: 50%;
     background: var(--linha); border: 2px solid var(--carta);
   }
+  /* Situação fiscal no painel */
+  .faixa-dinheiro { display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-end;
+    margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--linha-2); }
+  .dinheiro { display: flex; flex-direction: column; gap: 2px; }
+  .dinheiro .rot { font-size: 10px; font-weight: 700; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--texto-3); }
+  .dinheiro strong { font-size: 22px; letter-spacing: -.02em; color: var(--texto); }
+  .dinheiro strong.alerta { color: var(--nova); }
+  .faixa-dinheiro .ressalva { flex: 1 1 100%; margin: 4px 0 0;
+    font-size: 11.5px; color: var(--texto-3); }
+  .rolagem-media { max-height: 340px; overflow: auto; }
+  td.forte { font-weight: 600; font-family: var(--mono); }
+
   .marco.mudou::before { background: var(--nova); }
   .marco-data { font-variant-numeric: tabular-nums; color: var(--texto-2); min-width: 8ch; }
   .marco-txt { color: var(--texto-2); }
@@ -710,6 +723,39 @@
             <div class="cartao-corpo"><div class="contadores" id="m-alcance"></div></div>
           </section>
         </div>
+
+        <section class="cartao">
+          <div class="cartao-topo">
+            <h2>Situação fiscal da carteira</h2>
+            <span class="dica"><span id="fis-cobertura">—</span></span>
+          </div>
+          <div class="cartao-corpo">
+            <div class="contadores" id="fis-numeros"></div>
+            <div id="fis-dinheiro" class="faixa-dinheiro"></div>
+          </div>
+        </section>
+
+        <section class="cartao">
+          <div class="cartao-topo">
+            <h2>Empresas com pendência</h2>
+            <span class="dica">maior valor em cobrança primeiro</span>
+          </div>
+          <div class="rolagem rolagem-media">
+            <table>
+              <thead>
+                <tr>
+                  <th class="dir">ID</th>
+                  <th>Cliente</th>
+                  <th class="dir">Débitos</th>
+                  <th class="dir">Dívida ativa</th>
+                  <th class="dir">Em cobrança</th>
+                  <th>Consultado</th>
+                </tr>
+              </thead>
+              <tbody id="linhas-pendencia"></tbody>
+            </table>
+          </div>
+        </section>
 
         <section class="cartao">
           <div class="cartao-topo">

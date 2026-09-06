@@ -209,7 +209,25 @@ app.post('/api/coleta', exigirEdicao, (req, res) => {
     emitir({ tipo: 'fim', codigo });
     registrar(usuario, 'coleta-encerrada', cnpjs.join(','), { codigo });
     emAndamento = null;
-    try { importarAcervo(); emitir({ tipo: 'acervo-atualizado' }); } catch { /* segue */ }
+    // Registra os documentos novos E extrai a situação fiscal de cada um.
+    // Sem o segundo passo o PDF entra no acervo e a TELA NÃO MUDA — foi o que
+    // aconteceu em 06/09/2026: a coleta pelo botão parecia não ter feito nada,
+    // porque só quem rodava o extrator era eu, na mão.
+    try {
+      const { novos } = importarAcervo();
+      emitir({ tipo: 'linha', texto: `Acervo: ${novos} documento(s) novo(s).` });
+    } catch (e) {
+      emitir({ tipo: 'linha', texto: `Falha ao ler o acervo: ${e.message}` });
+    }
+
+    emitir({ tipo: 'linha', texto: 'Extraindo a situação fiscal dos relatórios...' });
+    const extrator = spawn(process.execPath, ['atualizar.js'], { cwd: RAIZ });
+    extrator.stdout.on('data', repassar);
+    extrator.stderr.on('data', repassar);
+    extrator.on('close', () => {
+      registrar(usuario, 'situacao-fiscal-extraida');
+      emitir({ tipo: 'acervo-atualizado' });
+    });
   });
 
   res.json({ ok: true, total: cnpjs.length });
