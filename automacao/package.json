@@ -1,25 +1,32 @@
-{
-  "name": "ecac-pendencias",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Robo local que acessa o e-CAC com certificado do procurador, troca de empresa e baixa o Relatorio de Situacao Fiscal (pendencias) de cada CNPJ.",
-  "type": "module",
-  "scripts": {
-    "start": "node src/index.js",
-    "empresa": "node src/index.js --cnpj",
-    "instalar-navegador": "playwright install chromium",
-    "mapear": "node src/mapear.js",
-    "planilha": "node src/planilha.js",
-    "painel": "node src/painel.js",
-    "documentos": "node src/documentos.js",
-    "drive-autorizar": "node src/drive-autorizar.js"
-  },
-  "dependencies": {
-    "exceljs": "^4.4.0",
-    "googleapis": "^178.0.0",
-    "playwright": "^1.49.0"
-  },
-  "engines": {
-    "node": ">=18"
-  }
+﻿{
+    "name":  "ecac-pendencias",
+    "version":  "1.0.0",
+    "private":  true,
+    "description":  "Robo local que acessa o e-CAC com certificado do procurador, troca de empresa e baixa o Relatorio de Situacao Fiscal (pendencias) de cada CNPJ.",
+    "type":  "module",
+    "scripts":  {
+                    "start":  "node src/index.js",
+                    "empresa":  "node src/index.js --cnpj",
+                    "instalar-navegador":  "playwright install chromium",
+                    "mapear":  "node src/mapear.js",
+                    "mapear-manual":  "node src/mapear-manual.js",
+                    "mapear-menu":  "node src/mapear-menu.js",
+                    "teste":  "node src/teste.js",
+                    "teste2":  "node src/teste2.js",
+                    "coletar":  "node src/coletar.js",
+                    "planilha":  "node src/planilha.js",
+                    "painel":  "node src/painel.js",
+                    "documentos":  "node src/documentos.js",
+                    "drive-autorizar":  "node src/drive-autorizar.js",
+                    "navegador":  "node src/navegador-persistente.js"
+                },
+    "dependencies":  {
+                         "exceljs":  "^4.4.0",
+                         "googleapis":  "^178.0.0",
+                         "pdf-parse":  "^2.4.5",
+                         "playwright":  "^1.49.0"
+                     },
+    "engines":  {
+                    "node":  "\u003e=18"
+                }
 }

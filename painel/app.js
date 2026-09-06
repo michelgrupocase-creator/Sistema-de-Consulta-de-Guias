@@ -133,6 +133,31 @@
     return { estado: 'impedida', texto: String(v) };
   }
 
+  // Situação fiscal vinda da consulta ao portal da Receita.
+  // Só existe depois que o robô rodou. Sem consulta a tela diz que NÃO SABE —
+  // nunca "em dia". Afirmar regularidade sem ter verificado é o erro que já
+  // apontou dezenas de vencimentos falsos na primeira versão do painel.
+  function fiscal(c) {
+    const s = c.sf;
+    if (!s) return { estado: 'vazio', texto: 'Não consultada', quando: null };
+    if (s.resultado === 'sem-pendencia') {
+      return { estado: 'limpa', texto: 'Sem pendência', quando: s.consultadoEm };
+    }
+    const partes = [];
+    if (s.debitos) partes.push(`${s.debitos} débito${s.debitos > 1 ? 's' : ''}`);
+    if (s.parcelasEmAtraso) partes.push(`${s.parcelasEmAtraso} parcela${s.parcelasEmAtraso > 1 ? 's' : ''} em atraso`);
+    if (s.dividaAtiva) partes.push(`${s.dividaAtiva} na dívida ativa`);
+    if (s.pgfn === 'com-pendencia' && !partes.length) partes.push('pendência na PGFN');
+    return { estado: 'pendente', texto: partes.join(' · ') || 'Com pendência', quando: s.consultadoEm };
+  }
+
+  const seloFiscal = (c) => {
+    const f = fiscal(c);
+    if (f.estado === 'vazio') return '';
+    const cls = f.estado === 'limpa' ? 'limpo' : 'nova';
+    return `<div class="fiscal"><span class="selo ${cls}">${escapar(f.texto)}</span></div>`;
+  };
+
   function estadoCliente(c) {
     const p = procuracaoECac(c);
     const cf = certificado(c);
@@ -361,7 +386,7 @@
           .map(
             (c) => `<tr tabindex="0" data-id="${escapar(c.id)}" aria-selected="${c.id === selecionado}">
         ${celulasBase(c)}
-        <td><span class="selo ${CLASSE[c._e.chave]}">${escapar(c._e.rotulo)}</span></td>
+        <td><span class="selo ${CLASSE[c._e.chave]}">${escapar(c._e.rotulo)}</span>${seloFiscal(c)}</td>
         <td><span class="pontos">${pontos(c)}</span></td>
         <td class="campo">${elo(c.r)}</td>
       </tr>`
@@ -521,6 +546,31 @@
       })
       .join('');
 
+    // Situação fiscal: o que a consulta ao portal trouxe, com a data.
+    // Sem consulta o bloco DIZ isso, em vez de sumir — sumir é pior, porque
+    // ausência parece "está tudo bem".
+    // (a variável não pode se chamar `f`: a ficha já usa `f` para a folha.)
+    const sfic = fiscal(c);
+    const blocoFiscal = `
+        <section class="cartao">
+          <div class="cartao-topo">
+            <h2>Situação fiscal</h2>
+            <span class="dica">${sfic.quando ? 'consultado em ' + brData(String(sfic.quando).slice(0, 10)) : 'nunca consultado'}</span>
+          </div>
+          <div class="cartao-corpo">
+            <dl class="ficha">
+              <dt>Resultado</dt>
+              <dd><span class="selo ${sfic.estado === 'limpa' ? 'limpo' : sfic.estado === 'pendente' ? 'nova' : 'conhecida'}">${escapar(sfic.texto)}</span></dd>
+              <dt>Parcelamento</dt>
+              <dd>${c.sf ? (c.sf.emParcelamento ? '<span class="selo falha">Em parcelamento</span>' : 'Não') : nulo('não consultado')}</dd>
+              <dt>Dívida ativa</dt>
+              <dd>${c.sf ? (c.sf.dividaAtiva || 'Nenhuma') : nulo('não consultado')}</dd>
+              <dt>Cadastro na Receita</dt>
+              <dd>${c.sf?.situacaoCadastral ? escapar(c.sf.situacaoCadastral) : nulo('não consultado')}</dd>
+            </dl>
+          </div>
+        </section>`;
+
     const proc = PROCURACOES.map(([k, rot]) => `<dt>${rot}</dt><dd>${seloProc(c.pg?.[k])}</dd>`).join('');
     const i = c.ins || {};
     const f = c.fo || {};
@@ -588,6 +638,8 @@
             </dl>
           </div>
         </section>
+
+${blocoFiscal}
 
         <section class="cartao">
           <div class="cartao-topo"><h2>Certidões</h2><span class="dica">clique para ver quem mais está assim</span></div>
