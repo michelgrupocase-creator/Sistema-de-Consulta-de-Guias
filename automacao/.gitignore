@@ -1,0 +1,23 @@
+# Nada abaixo pode ir para o repositório.
+config.json
+empresas.json
+cert/
+*.pfx
+*.p12
+relatorios/
+node_modules/
+
+# Base gerada da planilha de controle — dados de clientes, nunca versionar.
+dados/
+*.xlsx
+
+# Acervo de documentos baixados — situação fiscal e certidões de terceiros.
+# É o material mais sensível do projeto: sigilo fiscal em PDF.
+acervo/
+
+# Perfil do navegador (sessao logada no e-CAC) - nunca versionar.
+.perfil-navegador/
+
+# Logs de execucao - contem CNPJ e nome de cliente. Sigilo fiscal.
+log-*.txt
+

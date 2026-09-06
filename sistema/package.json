@@ -1,0 +1,22 @@
+{
+  "name": "radar-fiscal-case",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistema de acompanhamento fiscal do Grupo Case. Roda no escritorio, com login por pessoa.",
+  "type": "module",
+  "scripts": {
+    "start": "node servidor.js",
+    "usuario": "node usuario.js",
+    "montar": "node montar.js",
+    "importar": "node importar.js",
+    "atualizar": "node atualizar.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "bcryptjs": "^2.4.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

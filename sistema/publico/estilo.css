@@ -1,0 +1,115 @@
+/* Camada visual do que é NOVO no sistema: entrada e coleta.
+   O painel aprovado traz o próprio estilo — aqui só o que ele não tinha,
+   usando as mesmas variáveis para não destoar. */
+
+#capa-login {
+  position: fixed; inset: 0; z-index: 9999;
+  display: grid; place-items: center;
+  background: #17181A;
+  padding: 24px;
+}
+.cartao-login {
+  width: 100%; max-width: 380px;
+  background: #FFFFFF;
+  border-radius: 10px;
+  padding: 34px 30px 26px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.45);
+  font-family: Barlow, -apple-system, "Segoe UI", Arial, sans-serif;
+}
+.marca-login {
+  width: 46px; height: 46px; margin-bottom: 18px;
+  border-radius: 8px;
+  background: linear-gradient(140deg, #C9A24A, #A97C1C);
+}
+.cartao-login h1 { margin: 0; font-size: 21px; letter-spacing: -.01em; color: #1B1C1A; }
+.cartao-login .sub { margin: 4px 0 22px; font-size: 12.5px; color: #63615A; }
+.cartao-login label {
+  display: block; margin: 0 0 5px;
+  font-size: 10px; font-weight: 700; letter-spacing: .09em;
+  text-transform: uppercase; color: #94918A;
+}
+.cartao-login input {
+  width: 100%; box-sizing: border-box;
+  padding: 10px 12px; margin-bottom: 16px;
+  font: inherit; font-size: 14px;
+  border: 1px solid #E3E0D8; border-radius: 6px;
+  background: #FAF9F6;
+}
+.cartao-login input:focus {
+  outline: none; border-color: #A97C1C;
+  box-shadow: 0 0 0 3px rgba(169,124,28,.14);
+}
+.cartao-login button {
+  width: 100%; padding: 11px;
+  font: inherit; font-size: 14px; font-weight: 600;
+  color: #fff; background: #17181A;
+  border: 0; border-radius: 6px; cursor: pointer;
+}
+.cartao-login button:hover { background: #24262A; }
+.cartao-login button:disabled { opacity: .6; cursor: default; }
+#login-erro { min-height: 16px; margin: -8px 0 12px; font-size: 12.5px; color: #B3372F; }
+.rodape-login { margin: 18px 0 0; font-size: 11px; color: #94918A; text-align: center; }
+
+/* ---- Coleta ---- */
+#barra-coleta { position: fixed; right: 18px; bottom: 18px; z-index: 900;
+  font-family: Barlow, -apple-system, "Segoe UI", Arial, sans-serif; }
+#btn-coleta {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px; font: inherit; font-size: 13px; font-weight: 600;
+  color: #fff; background: #17181A; border: 0; border-radius: 999px;
+  cursor: pointer; box-shadow: 0 6px 20px rgba(20,20,18,.22);
+}
+#btn-coleta .pt { width: 8px; height: 8px; border-radius: 50%; background: #C9A24A; }
+#btn-coleta.rodando .pt { background: #3F7A34; animation: pulsa 1.2s infinite; }
+@keyframes pulsa { 50% { opacity: .25; } }
+#painel-coleta {
+  position: absolute; right: 0; bottom: 52px; width: 460px; max-width: 88vw;
+  background: #fff; border: 1px solid #E3E0D8; border-radius: 10px;
+  box-shadow: 0 18px 50px rgba(20,20,18,.20); overflow: hidden;
+}
+#painel-coleta header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; border-bottom: 1px solid #EFEDE7; font-size: 13px;
+}
+#painel-coleta header button { border: 0; background: none; font-size: 20px; cursor: pointer; color: #63615A; }
+#painel-coleta .corpo { padding: 14px; }
+#painel-coleta .aviso {
+  margin: 0 0 14px; padding: 10px 12px; font-size: 12px; line-height: 1.5;
+  color: #85500E; background: #FBEEDA; border-radius: 6px;
+}
+#painel-coleta label { display: block; margin-bottom: 5px; font-size: 10px;
+  font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: #94918A; }
+#painel-coleta select { width: 100%; padding: 9px 10px; font: inherit; font-size: 13px;
+  border: 1px solid #E3E0D8; border-radius: 6px; background: #FAF9F6; }
+#painel-coleta .acoes { display: flex; gap: 8px; margin: 12px 0; }
+#painel-coleta .acoes button { flex: 1; padding: 9px; font: inherit; font-size: 13px;
+  font-weight: 600; border-radius: 6px; cursor: pointer; border: 0; color: #fff; background: #17181A; }
+#parar-coleta { background: #B3372F !important; }
+#log-coleta {
+  margin: 0; padding: 10px; height: 190px; overflow: auto;
+  font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; line-height: 1.55;
+  color: #E3E0D8; background: #17181A; border-radius: 6px; white-space: pre-wrap;
+}
+
+/* ---- Detalhamento dos débitos na ficha ---- */
+.detalhe-fiscal { margin-top: 16px; }
+.detalhe-titulo {
+  display: flex; align-items: center; gap: 8px;
+  margin: 0 0 8px; font-size: 10px; font-weight: 700;
+  letter-spacing: .09em; text-transform: uppercase; color: #94918A;
+}
+.detalhe-titulo span {
+  padding: 1px 7px; border-radius: 999px;
+  background: #EFEDE7; color: #63615A; font-size: 10px; letter-spacing: 0;
+}
+.tabela-debitos { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.tabela-debitos th {
+  padding: 6px 8px; text-align: left; font-size: 10px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase; color: #94918A;
+  border-bottom: 1px solid #EFEDE7;
+}
+.tabela-debitos td { padding: 7px 8px; border-bottom: 1px solid #F3F1EB; vertical-align: middle; }
+.tabela-debitos tr:last-child td { border-bottom: 0; }
+.tabela-debitos .num { text-align: right; font-family: ui-monospace, Consolas, monospace; }
+.tabela-debitos .forte { font-weight: 600; color: #1B1C1A; }
+.tabela-debitos .codigo { font-family: ui-monospace, Consolas, monospace; font-size: 11px; color: #94918A; }

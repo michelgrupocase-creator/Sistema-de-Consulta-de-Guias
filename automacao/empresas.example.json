@@ -1,0 +1,16 @@
+[
+  {
+    "cnpj": "00.000.000/0001-91",
+    "apelido": "Empresa Exemplo Ltda",
+    "certificado": "escritorio"
+  },
+  {
+    "cnpj": "11111111000111",
+    "apelido": "Outro Cliente ME",
+    "certificado": "responsavel"
+  },
+  {
+    "cnpj": "22.222.222/0001-22",
+    "apelido": "Sem certificado declarado usa o padrao"
+  }
+]

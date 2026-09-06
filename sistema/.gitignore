@@ -1,0 +1,16 @@
+﻿# Nada aqui pode ir para o repositorio.
+
+# Banco do sistema: cadastro completo da carteira. Sigilo fiscal.
+dados/
+clientes.json
+
+# Senha provisoria gerada na instalacao.
+SENHA-PROVISORIA.txt
+
+# Gerado por `npm run montar` a partir de ../painel. Nunca editar nem versionar.
+publico/index.html
+
+node_modules/
+servidor.log
+tela-teste.png
+testar-tela.mjs

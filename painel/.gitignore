@@ -1,0 +1,3 @@
+# Painel montado — leva CNPJ e situação fiscal de clientes embutidos.
+# Dado sob sigilo: gera com `npm run painel`, nunca versiona.
+radar-fiscal.html

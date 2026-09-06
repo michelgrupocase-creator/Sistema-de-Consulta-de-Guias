@@ -1,0 +1,884 @@
+<title>Radar Fiscal CASE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap">
+
+<style>
+  /* ==========================================================
+     Radar Fiscal CASE — sistema de cadastro e acompanhamento
+     fiscal da carteira do escritório.
+
+     Regras de tela que valem em todo o arquivo:
+     · Caixa alta só em rótulo de seção (10px). Dado de cliente
+       nunca grita: nome, cidade e regime vão em Capitulado.
+     · Ouro é acento, não cor de texto. Ele marca o item ativo,
+       o botão primário e a marca — nada além disso.
+     · Uma linha por cliente. Densidade é o que faz uma tela
+       operacional servir para trabalhar em vez de rolar.
+     ========================================================== */
+  :root {
+    --logo: url("__LOGO_URI__");
+
+    --tinta:      #17181A;
+    --tinta-2:    #24262A;
+    --fundo:      #F1F0EC;
+    --carta:      #FFFFFF;
+    --carta-2:    #FAF9F6;
+    --linha:      #E3E0D8;
+    --linha-2:    #EFEDE7;
+
+    --texto:      #1B1C1A;
+    --texto-2:    #63615A;
+    --texto-3:    #94918A;
+
+    --ouro:       #A97C1C;
+    --ouro-2:     #C9A24A;
+    --ouro-viva:  #F0B020;
+
+    --limpo:     #3F7A34;  --limpo-bg:  #EAF1E4;  --limpo-ink:  #2C5A25;
+    --nova:      #B3372F;  --nova-bg:   #F9E6E3;  --nova-ink:   #8E2A24;
+    --falha:     #D08010;  --falha-bg:  #FBEEDA;  --falha-ink:  #85500E;
+    --neutro-bg: #EFEDE7;  --neutro-ink:#63615A;
+
+    --bl: Barlow, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+    --r: 8px;
+    --sombra: 0 1px 2px rgba(20, 20, 18, .05), 0 1px 8px rgba(20, 20, 18, .03);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--fundo);
+    color: var(--texto);
+    font-family: var(--bl);
+    font-size: 13px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3 { margin: 0; font-weight: 600; }
+  button { font-family: inherit; }
+
+  /* Rótulo de seção. É o único lugar com caixa alta. */
+  .eyebrow {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--texto-3);
+  }
+
+  /* ---------- Esqueleto ---------- */
+  .app { display: flex; height: 100vh; overflow: hidden; }
+
+  .trilho {
+    width: 112px;
+    flex: none;
+    background: var(--tinta);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 14px 10px;
+    gap: 2px;
+  }
+
+  .marca-simbolo {
+    height: 34px;
+    margin: 2px 4px 14px;
+    background: var(--logo) no-repeat left center / contain;
+  }
+
+  /* Item de menu: largura toda, rótulo com espaço para caber.
+     O trilho antigo cortava "Relatórios" e "Certidões" no meio. */
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    padding: 8px 9px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: #9A968C;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: background .12s, color .12s;
+  }
+  .item svg { width: 16px; height: 16px; flex: none; }
+  .item:hover { background: rgba(255, 255, 255, .06); color: #D8D4C9; }
+  .item[aria-current="page"] { background: rgba(240, 176, 32, .13); color: var(--ouro-viva); }
+
+  .trilho .rodape-trilho { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }
+
+  .avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--ouro-viva); color: var(--tinta);
+    display: grid; place-items: center;
+    font-size: 11px; font-weight: 700;
+  }
+
+  .principal { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; }
+
+  /* ---------- Topo ---------- */
+  .topo {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: var(--carta);
+    border-bottom: 1px solid var(--linha);
+  }
+
+  .busca {
+    display: flex; align-items: center; gap: 7px;
+    flex: 1 1 340px; max-width: 420px; min-width: 200px;
+    padding: 7px 11px;
+    background: var(--fundo);
+    border: 1px solid var(--linha);
+    border-radius: 7px;
+  }
+  .busca:focus-within { border-color: var(--ouro-2); background: var(--carta); }
+  .busca svg { width: 14px; height: 14px; color: var(--texto-3); flex: none; }
+  .busca input {
+    flex: 1; min-width: 0; border: 0; background: none; outline: none;
+    font: inherit; color: var(--texto);
+  }
+  .busca input::placeholder { color: var(--texto-3); }
+
+  .acoes { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+
+  .acao {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 10px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: none;
+    color: var(--texto-2);
+    font-size: 12px; font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .acao:hover { background: var(--fundo); color: var(--texto); }
+  .acao[aria-pressed="true"] { background: var(--tinta); color: #fff; }
+  .acao .qtd { font-size: 11px; opacity: .75; font-variant-numeric: tabular-nums; }
+
+  .estado-topo {
+    margin-left: auto; display: flex; align-items: center; gap: 6px;
+    font-size: 11.5px; color: var(--texto-2); white-space: nowrap;
+  }
+  .pulso { width: 6px; height: 6px; border-radius: 50%; background: var(--limpo); }
+  .pulso.frio { background: var(--texto-3); }
+
+  /* ---------- Botões ---------- */
+  .botao {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid var(--tinta);
+    border-radius: 6px;
+    background: var(--tinta);
+    color: #fff;
+    font-size: 12px; font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .botao:hover { background: var(--tinta-2); }
+  .botao svg { width: 13px; height: 13px; }
+  .botao.vazado { background: none; color: var(--texto); border-color: var(--linha); }
+  .botao.vazado:hover { background: var(--fundo); }
+  .botao.perigo { background: none; color: var(--nova-ink); border-color: var(--nova-bg); }
+  .botao.perigo:hover { background: var(--nova-bg); }
+  .botao[disabled] { opacity: .45; cursor: not-allowed; }
+
+  /* ---------- Vistas ---------- */
+  .vista { display: none; }
+  .vista[data-ativa] { display: grid; }
+  .conteudo {
+    flex: 1; min-height: 0;
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 400px);
+    gap: 12px; padding: 12px 16px;
+  }
+  .vista-unica { grid-template-columns: minmax(0, 1fr); }
+  .coluna { display: flex; flex-direction: column; gap: 12px; min-width: 0; min-height: 0; overflow-y: auto; }
+
+  /* ---------- Barras de rolagem ----------
+     A barra grossa do sistema roubava espaço e aparecia duplicada:
+     a coluna rolava por fora enquanto o cartão rolava por dentro.
+     Aqui ela é fina, discreta e some quando não há o que rolar. */
+  .coluna, .rolagem, .modal-corpo {
+    scrollbar-width: thin;
+    scrollbar-color: var(--linha) transparent;
+    overscroll-behavior: contain;
+  }
+  .coluna::-webkit-scrollbar,
+  .rolagem::-webkit-scrollbar,
+  .modal-corpo::-webkit-scrollbar { width: 9px; height: 9px; }
+
+  .coluna::-webkit-scrollbar-track,
+  .rolagem::-webkit-scrollbar-track,
+  .modal-corpo::-webkit-scrollbar-track { background: transparent; }
+
+  .coluna::-webkit-scrollbar-thumb,
+  .rolagem::-webkit-scrollbar-thumb,
+  .modal-corpo::-webkit-scrollbar-thumb {
+    background: var(--linha);
+    border-radius: 20px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  .coluna:hover::-webkit-scrollbar-thumb,
+  .rolagem:hover::-webkit-scrollbar-thumb,
+  .modal-corpo:hover::-webkit-scrollbar-thumb { background: #C9C5BA; background-clip: content-box; }
+  .coluna::-webkit-scrollbar-corner,
+  .rolagem::-webkit-scrollbar-corner { background: transparent; }
+
+  /* Uma rolagem por coluna. A coluna que tem um cartão só (a ficha)
+     não rola: quem rola é o miolo do cartão, sob o cabeçalho fixo. */
+  .coluna.fixa { overflow: hidden; }
+
+  /* ---------- Cartão ---------- */
+  .cartao {
+    background: var(--carta);
+    border: 1px solid var(--linha);
+    border-radius: var(--r);
+    box-shadow: var(--sombra);
+    min-height: 0;
+    display: flex; flex-direction: column;
+  }
+  .cartao.cresce { flex: 1; }
+
+  .cartao-topo {
+    flex: none;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--linha-2);
+  }
+  .cartao-topo h2 { font-size: 13.5px; }
+  .cartao-topo .dica { font-size: 11.5px; color: var(--texto-3); }
+
+  .cartao-corpo { padding: 12px 14px; }
+  .cartao-pe {
+    margin-top: auto; flex: none;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 10px 14px;
+    border-top: 1px solid var(--linha-2);
+    background: var(--carta-2);
+    border-radius: 0 0 var(--r) var(--r);
+  }
+  .cartao-pe .origem { font-size: 11px; color: var(--texto-3); }
+
+  /* ---------- Tudo clicável ----------
+     Contador, barra e selo são botões: cada número leva à lista que
+     ele conta. Eles não podem parecer botão de formulário, então
+     herdam o visual do texto e só reagem ao passar o mouse. */
+  .contador, .medida, .elo, .elo-n, .clicavel {
+    font: inherit; color: inherit; text-align: left;
+    border: 0; background: none; padding: 0; margin: 0;
+    cursor: pointer;
+  }
+
+  .contador {
+    display: flex; align-items: baseline; gap: 9px; width: 100%;
+    padding: 3px 5px; margin: -3px -5px; border-radius: 5px;
+  }
+  .contador:hover { background: var(--fundo); }
+  .contador:focus-visible, .medida:focus-visible, .elo:focus-visible,
+  .elo-n:focus-visible, .clicavel:focus-visible {
+    outline: 2px solid var(--ouro-2); outline-offset: 2px; border-radius: 4px;
+  }
+
+  .medida { display: block; width: 100%; padding: 3px 5px; margin: 0 -5px; border-radius: 5px; }
+  .medida + .medida { margin-top: 5px; }
+  .medida:hover { background: var(--fundo); }
+  .trilha { display: block; }
+  .leg { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: 4px; }
+
+  /* Link de dado: nome de responsável, cidade, regime, CNPJ. */
+  .elo {
+    color: var(--texto-2);
+    border-bottom: 1px solid transparent;
+    max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .elo:hover { color: var(--ouro); border-bottom-color: var(--ouro-2); }
+  .elo.mono { font-family: var(--mono); font-size: 12px; }
+  .elo-n:hover { text-decoration: underline; }
+  .clicavel:hover { filter: brightness(.95); }
+
+  /* Filtro vindo de um contador não acende botão na barra; esta marca
+     diz por que a lista encolheu, e permite desfazer. */
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 6px 4px 10px; border-radius: 20px;
+    background: var(--tinta); color: #fff;
+    font-size: 11.5px; font-weight: 600; white-space: nowrap;
+  }
+  .chip button {
+    border: 0; background: rgba(255,255,255,.16); color: #fff;
+    width: 16px; height: 16px; border-radius: 50%;
+    display: grid; place-items: center; cursor: pointer; padding: 0;
+  }
+  .chip button:hover { background: rgba(255,255,255,.32); }
+  .chip svg { width: 9px; height: 9px; }
+
+  .campos { margin-top: 8px; }
+
+  /* Link para o documento no Drive. */
+  .elo-doc {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px 3px 7px;
+    border: 1px solid var(--linha); border-radius: 5px;
+    background: var(--carta);
+    color: var(--texto-2); font-size: 11.5px; font-weight: 600;
+    text-decoration: none;
+  }
+  .elo-doc:hover { border-color: var(--ouro-2); color: var(--ouro); background: var(--carta-2); }
+  .elo-doc svg { width: 12px; height: 12px; }
+
+  /* ---------- Linha do tempo e mudanças ----------
+     O acervo guarda uma entrada por coleta, mas a tela mostra MARCOS: só
+     quando o documento mudou, com quantas conferências passaram sem mudar
+     no meio. Listar toda coleta encheria a tela de repetição. */
+  .trilha-doc + .trilha-doc { margin-top: 14px; }
+  .marcos { list-style: none; margin: 6px 0 0; padding: 0 0 0 14px; border-left: 2px solid var(--linha-2); }
+  .marco {
+    position: relative;
+    display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
+    padding: 5px 0; font-size: 12px;
+  }
+  .marco::before {
+    content: ''; position: absolute; left: -19px; top: 11px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--linha); border: 2px solid var(--carta);
+  }
+  /* Situação fiscal no painel */
+  .faixa-dinheiro { display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-end;
+    margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--linha-2); }
+  .dinheiro { display: flex; flex-direction: column; gap: 2px; }
+  .dinheiro .rot { font-size: 10px; font-weight: 700; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--texto-3); }
+  .dinheiro strong { font-size: 22px; letter-spacing: -.02em; color: var(--texto); }
+  .dinheiro strong.alerta { color: var(--nova); }
+  .faixa-dinheiro .ressalva { flex: 1 1 100%; margin: 4px 0 0;
+    font-size: 11.5px; color: var(--texto-3); }
+  .rolagem-media { max-height: 340px; overflow: auto; }
+  td.forte { font-weight: 600; font-family: var(--mono); }
+
+  .marco.mudou::before { background: var(--nova); }
+  .marco-data { font-variant-numeric: tabular-nums; color: var(--texto-2); min-width: 8ch; }
+  .marco-txt { color: var(--texto-2); }
+  .marco.mudou .marco-txt b { color: var(--nova-ink); }
+
+  .mudancas { list-style: none; margin: 0; padding: 0; }
+  .mudancas li {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 6px 0; font-size: 12.5px;
+  }
+  .mudancas li + li { border-top: 1px solid var(--linha-2); }
+  .mudancas .quando {
+    font-variant-numeric: tabular-nums; color: var(--texto-3);
+    font-size: 11.5px; min-width: 8ch;
+  }
+
+  .grade-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+
+  /* ---------- Números ---------- */
+  .contadores { display: flex; flex-direction: column; gap: 7px; }
+  .contador { display: flex; align-items: baseline; gap: 9px; }
+  .contador .n {
+    min-width: 3.2ch; font-size: 17px; font-weight: 700;
+    font-variant-numeric: tabular-nums; line-height: 1.1;
+  }
+  .contador .rot { font-size: 12px; color: var(--texto-2); }
+  .n--alerta { color: var(--nova-ink); }
+  .n--aviso  { color: var(--falha-ink); }
+  .n--bom    { color: var(--limpo-ink); }
+  .n--zero   { color: var(--texto-3); }
+
+  .medida + .medida { margin-top: 8px; }
+  .trilha { height: 4px; background: var(--linha-2); border-radius: 2px; overflow: hidden; }
+  .preenche { height: 100%; background: var(--ouro-2); border-radius: 2px; }
+  .preenche.bom { background: var(--limpo); }
+  .preenche.alerta { background: var(--nova); }
+  .medida .leg {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+    margin-top: 4px; font-size: 11.5px; color: var(--texto-2);
+  }
+  .medida .leg b { font-variant-numeric: tabular-nums; color: var(--texto); font-weight: 600; }
+
+  /* ---------- Tabela ---------- */
+  .rolagem { overflow: auto; min-height: 0; flex: 1 1 auto; }
+  table { width: 100%; border-collapse: collapse; }
+
+  thead th {
+    position: sticky; top: 0; z-index: 1;
+    text-align: left;
+    padding: 7px 10px;
+    background: var(--carta-2);
+    border-bottom: 1px solid var(--linha);
+    font-size: 10px; font-weight: 600;
+    letter-spacing: .09em; text-transform: uppercase;
+    color: var(--texto-3);
+    white-space: nowrap;
+  }
+  thead th.dir { text-align: right; }
+
+  tbody td {
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--linha-2);
+    vertical-align: middle;
+  }
+  tbody tr { cursor: pointer; }
+  tbody tr:hover { background: var(--carta-2); }
+  tbody tr[aria-selected="true"] { background: #FBF6E8; }
+  tbody tr:focus-visible { outline: 2px solid var(--ouro-2); outline-offset: -2px; }
+
+  /* Uma linha por cliente: nome e CNPJ lado a lado, sem quebra. */
+  td.faixa { width: 3px; padding: 0; }
+  td.id {
+    width: 46px; text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-size: 11.5px; color: var(--texto-3);
+  }
+  td.empresa { width: 42%; max-width: 0; }
+  td.empresa .nome {
+    font-weight: 600; font-size: 12.5px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  td.empresa .cnpj {
+    font-family: var(--mono); font-size: 10.5px; color: var(--texto-3);
+    white-space: nowrap;
+  }
+  td.campo {
+    font-size: 12px; color: var(--texto-2);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 0;
+  }
+  td.vazio { padding: 30px 12px; text-align: center; color: var(--texto-3); }
+
+  .pontos { display: flex; gap: 3px; }
+  .ponto { width: 7px; height: 7px; border-radius: 2px; display: inline-block; }
+
+  /* ---------- Selo ---------- */
+  .selo {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 7px; border-radius: 4px;
+    font-size: 11px; font-weight: 600; white-space: nowrap;
+  }
+  .selo.limpo     { background: var(--limpo-bg);  color: var(--limpo-ink); }
+  .selo.nova      { background: var(--nova-bg);   color: var(--nova-ink); }
+  .selo.falha     { background: var(--falha-bg);  color: var(--falha-ink); }
+  .selo.conhecida { background: var(--neutro-bg); color: var(--neutro-ink); }
+  .id-selo {
+    display: inline-block; padding: 1px 6px; border-radius: 4px;
+    background: var(--fundo); color: var(--texto-2);
+    font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- Ficha ---------- */
+  .secao { padding: 12px 14px; }
+  .secao + .secao { border-top: 1px solid var(--linha-2); }
+  .secao .eyebrow { display: block; margin-bottom: 8px; }
+
+  .ficha { display: grid; grid-template-columns: minmax(96px, 40%) minmax(0, 1fr); gap: 5px 12px; margin: 0; }
+  .ficha dt { font-size: 11.5px; color: var(--texto-3); }
+  .ficha dd { margin: 0; font-size: 12.5px; overflow-wrap: anywhere; }
+  .nulo { color: var(--texto-3); font-style: italic; }
+
+  .titulo-ficha {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 14.5px; font-weight: 600; line-height: 1.3;
+  }
+
+  /* ---------- Tela da ficha ----------
+     Clicar num cliente salta para a ficha dele em tela cheia. O painel
+     lateral de 340px espremia o cadastro em duas colunas estreitas e
+     obrigava a rolar dentro de uma caixa dentro de outra. */
+  .ficha-topo {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 14px 16px;
+    background: var(--carta);
+    border: 1px solid var(--linha);
+    border-radius: var(--r);
+    box-shadow: var(--sombra);
+  }
+  .ficha-topo h1 { font-size: 17px; line-height: 1.25; min-width: 0; }
+  .ficha-topo .acoes-ficha { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .voltar {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 11px 6px 8px;
+    border: 1px solid var(--linha); border-radius: 6px;
+    background: var(--carta); color: var(--texto-2);
+    font-size: 12px; font-weight: 600; cursor: pointer;
+  }
+  .voltar:hover { background: var(--fundo); color: var(--texto); }
+  .voltar svg { width: 14px; height: 14px; }
+
+  .grade-ficha {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 12px;
+    align-items: start;
+  }
+
+  /* ---------- Formulário ---------- */
+  .campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px 12px; }
+  .campo-form { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .campo-form.largo { grid-column: 1 / -1; }
+  .campo-form label { font-size: 11px; font-weight: 600; color: var(--texto-2); }
+  .campo-form input,
+  .campo-form select {
+    width: 100%;
+    padding: 7px 9px;
+    border: 1px solid var(--linha);
+    border-radius: 6px;
+    background: var(--carta);
+    font: inherit; font-size: 12.5px; color: var(--texto);
+    outline: none;
+  }
+  .campo-form input:focus, .campo-form select:focus { border-color: var(--ouro-2); }
+  .campo-form input[type="checkbox"] { width: auto; }
+  .campo-form .ajuda { font-size: 10.5px; color: var(--texto-3); }
+  .campo-form.erro input { border-color: var(--nova); background: var(--nova-bg); }
+  .campo-form .msg { font-size: 10.5px; color: var(--nova-ink); }
+
+  .par { display: flex; align-items: center; gap: 7px; }
+  .par label { font-size: 12px; color: var(--texto); font-weight: 500; }
+
+  /* ---------- Modal ---------- */
+  .fundo-modal {
+    position: fixed; inset: 0; z-index: 40;
+    background: rgba(23, 24, 26, .45);
+    display: grid; place-items: center;
+    padding: 20px;
+  }
+  .modal {
+    background: var(--carta);
+    border-radius: 10px;
+    box-shadow: 0 18px 50px rgba(20, 20, 18, .25);
+    width: min(760px, 100%);
+    max-height: 90vh;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .modal-topo {
+    flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 14px 16px; border-bottom: 1px solid var(--linha);
+  }
+  .modal-topo h2 { font-size: 15px; }
+  .modal-corpo { overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 16px; }
+  .modal-pe {
+    flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 12px 16px; border-top: 1px solid var(--linha); background: var(--carta-2);
+  }
+  .fechar {
+    border: 0; background: none; cursor: pointer; padding: 4px;
+    color: var(--texto-3); line-height: 0; border-radius: 4px;
+  }
+  .fechar:hover { background: var(--fundo); color: var(--texto); }
+  .fechar svg { width: 16px; height: 16px; }
+
+  /* ---------- Avisos ---------- */
+  .placa {
+    grid-column: 1 / -1;
+    background: var(--carta);
+    border: 1px solid var(--linha);
+    border-left: 3px solid var(--ouro-2);
+    border-radius: var(--r);
+    padding: 18px 20px;
+    max-width: 78ch;
+    display: flex; flex-direction: column; gap: 9px;
+  }
+  .placa h3 { font-size: 13.5px; }
+  .placa p, .placa li { margin: 0; color: var(--texto-2); font-size: 12.5px; }
+  .placa ul { margin: 0; padding-left: 18px; }
+  .placa code {
+    font-family: var(--mono); font-size: 11.5px;
+    background: var(--fundo); padding: 1px 5px; border-radius: 4px;
+  }
+  .placa-duvida { border-left-color: var(--falha); background: var(--falha-bg); }
+  .placa-duvida h3, .placa-duvida p { color: var(--falha-ink); }
+  .placa-erro { border-left-color: var(--nova); background: var(--nova-bg); }
+  .placa-erro h3, .placa-erro p { color: var(--nova-ink); }
+
+  .nota { margin: 8px 0 0; font-size: 11.5px; color: var(--texto-2); }
+  .nota code {
+    font-family: var(--mono); font-size: 11px;
+    background: var(--fundo); padding: 1px 4px; border-radius: 3px;
+  }
+
+  .listas { display: flex; flex-direction: column; gap: 7px; }
+  .lista { display: grid; grid-template-columns: 3.4ch minmax(0, 1fr) auto; align-items: center; gap: 10px; }
+  .lista .n { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .lista .rot { font-size: 12px; color: var(--texto-2); }
+  .lista .botao { padding: 3px 9px; font-size: 11px; }
+
+  /* Carregando / sem banco */
+  .estado-vazio {
+    grid-column: 1 / -1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; padding: 60px 20px; text-align: center; color: var(--texto-2);
+  }
+  .estado-vazio h3 { font-size: 14px; color: var(--texto); }
+  .estado-vazio p { margin: 0; max-width: 46ch; font-size: 12.5px; }
+
+  .aviso-linha {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px; font-size: 12px;
+    background: var(--falha-bg); color: var(--falha-ink);
+    border-bottom: 1px solid var(--linha);
+  }
+
+  @media (max-width: 1120px) {
+    .conteudo { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 780px) {
+    .trilho { width: 56px; }
+    .item { justify-content: center; padding: 9px 0; }
+    .item span { display: none; }
+    .marca-simbolo { background-position: center; }
+  }
+</style>
+
+<div class="app">
+
+  <nav class="trilho" aria-label="Seções do sistema">
+    <div class="marca-simbolo" role="img" aria-label="Grupo Case"></div>
+
+    <button class="item" type="button" aria-current="page" data-vista="painel">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+      <span>Painel</span>
+    </button>
+    <button class="item" type="button" data-vista="clientes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 9h2M9 13h2M13 9h2M13 13h2"/></svg>
+      <span>Clientes</span>
+    </button>
+    <button class="item" type="button" data-vista="certidoes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+      <span>Certidões</span>
+    </button>
+    <button class="item" type="button" data-vista="guias">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg>
+      <span>Guias</span>
+    </button>
+    <button class="item" type="button" data-vista="relatorios">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15v3M12 10v8M17 6v12"/></svg>
+      <span>Relatórios</span>
+    </button>
+    <button class="item" type="button" data-vista="ajustes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.82 1.18V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 7.26 19.4l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3.09 14H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 7.26l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 2.82 1.18l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 20.91 10H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Ajustes</span>
+    </button>
+
+    <div class="rodape-trilho">
+      <div class="avatar" title="Grupo Case">GC</div>
+    </div>
+  </nav>
+
+  <div class="principal">
+
+    <header class="topo">
+      <label class="busca">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="busca" type="search" placeholder="Buscar cliente, CNPJ ou responsável" aria-label="Buscar cliente">
+      </label>
+
+      <div class="acoes" role="group" aria-label="Filtrar clientes">
+        <button class="acao" type="button" data-filtro="todos" aria-pressed="true">Todos <span class="qtd"></span></button>
+        <button class="acao" type="button" data-filtro="acao" aria-pressed="false">Exigem ação <span class="qtd"></span></button>
+        <button class="acao" type="button" data-filtro="sem-procuracao" aria-pressed="false">Sem procuração <span class="qtd"></span></button>
+        <button class="acao" type="button" data-filtro="certificado" aria-pressed="false">Certificado <span class="qtd"></span></button>
+        <button class="acao" type="button" data-filtro="certidoes" aria-pressed="false">Certidão impedida <span class="qtd"></span></button>
+        <button class="acao" type="button" data-filtro="det" aria-pressed="false">Sem DET <span class="qtd"></span></button>
+      </div>
+
+      <span id="marca-filtro" hidden></span>
+
+      <div class="estado-topo">
+        <span class="pulso" id="pulso" aria-hidden="true"></span>
+        <span id="estado-base">Conectando…</span>
+      </div>
+    </header>
+
+    <div id="aviso-base" hidden></div>
+
+    <!-- ---------- PAINEL ---------- -->
+    <main class="conteudo vista vista-unica" data-vista="painel" data-ativa>
+      <div class="coluna">
+        <div class="grade-3">
+          <section class="cartao">
+            <div class="cartao-topo"><h2>Prioridade</h2><span class="dica">procuração</span></div>
+            <div class="cartao-corpo"><div class="contadores" id="m-prioridade"></div></div>
+          </section>
+          <section class="cartao">
+            <div class="cartao-topo"><h2>Certificado digital</h2><span class="dica">do cliente</span></div>
+            <div class="cartao-corpo"><div class="contadores" id="m-certificado"></div></div>
+          </section>
+          <section class="cartao">
+            <div class="cartao-topo"><h2>Alcance do robô</h2><span class="dica">com procuração e-CAC</span></div>
+            <div class="cartao-corpo"><div class="contadores" id="m-alcance"></div></div>
+          </section>
+        </div>
+
+        <section class="cartao">
+          <div class="cartao-topo">
+            <h2>Situação fiscal da carteira</h2>
+            <span class="dica"><span id="fis-cobertura">—</span></span>
+          </div>
+          <div class="cartao-corpo">
+            <div class="contadores" id="fis-numeros"></div>
+            <div id="fis-dinheiro" class="faixa-dinheiro"></div>
+          </div>
+        </section>
+
+        <section class="cartao">
+          <div class="cartao-topo">
+            <h2>Empresas com pendência</h2>
+            <span class="dica">maior valor em cobrança primeiro</span>
+          </div>
+          <div class="rolagem rolagem-media">
+            <table>
+              <thead>
+                <tr>
+                  <th class="dir">ID</th>
+                  <th>Cliente</th>
+                  <th class="dir">Débitos</th>
+                  <th class="dir">Dívida ativa</th>
+                  <th class="dir">Em cobrança</th>
+                  <th>Consultado</th>
+                </tr>
+              </thead>
+              <tbody id="linhas-pendencia"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="cartao">
+          <div class="cartao-topo">
+            <h2>O que mudou</h2>
+            <span class="dica">desde a conferência anterior</span>
+          </div>
+          <div class="cartao-corpo" id="mudancas"></div>
+        </section>
+
+        <section class="cartao cresce">
+          <div class="cartao-topo">
+            <h2>Clientes</h2>
+            <span class="dica"><span id="contagem-clientes">—</span></span>
+          </div>
+          <div class="rolagem">
+            <table>
+              <thead>
+                <tr>
+                  <th class="faixa"></th>
+                  <th class="dir">ID</th>
+                  <th>Cliente</th>
+                  <th>Situação</th>
+                  <th>Certidões</th>
+                  <th>Responsável</th>
+                </tr>
+              </thead>
+              <tbody id="linhas"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+    </main>
+
+    <!-- ---------- CLIENTES ---------- -->
+    <main class="conteudo vista vista-unica" data-vista="clientes">
+      <div class="coluna">
+        <section class="cartao cresce">
+          <div class="cartao-topo">
+            <h2>Clientes</h2>
+            <span style="display:flex;align-items:center;gap:10px">
+              <span class="dica"><span id="cont-clientes-2">—</span></span>
+              <button class="botao" type="button" data-novo>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                Novo cliente
+              </button>
+            </span>
+          </div>
+          <div class="rolagem">
+            <table>
+              <thead>
+                <tr>
+                  <th class="faixa"></th>
+                  <th class="dir">ID</th>
+                  <th>Cliente</th>
+                  <th>Cidade</th>
+                  <th>Regime</th>
+                  <th>Responsável</th>
+                  <th>Certificado</th>
+                </tr>
+              </thead>
+              <tbody id="linhas-clientes"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- ---------- FICHA DO CLIENTE ---------- -->
+    <main class="conteudo vista vista-unica" data-vista="ficha">
+      <div class="coluna" id="ficha"></div>
+    </main>
+
+    <!-- ---------- CERTIDÕES ---------- -->
+    <main class="conteudo vista vista-unica" data-vista="certidoes">
+      <div class="coluna">
+        <div class="placa">
+          <h3>As certidões começam zeradas</h3>
+          <p>As datas que vieram da planilha foram <b>descartadas</b>: eram valores soltos que ninguém sabia se eram de emissão ou de validade, e lidos como validade apontavam dezenas de vencimentos falsos. Número errado é pior que número nenhum.</p>
+          <p>Cada certidão passa a existir quando a <b>consulta automática</b> a busca no portal. Até lá ela fica como <b>Não consultada</b> — que é o que o sistema de fato sabe.</p>
+        </div>
+        <div class="grade-3" id="resumo-certidoes"></div>
+        <section class="cartao cresce">
+          <div class="cartao-topo"><h2>Matriz de certidões</h2><span class="dica"><span id="cont-certidoes">—</span> clientes</span></div>
+          <div class="rolagem">
+            <table>
+              <thead>
+                <tr>
+                  <th class="dir">ID</th>
+                  <th>Cliente</th>
+                  <th>Federal</th><th>FGTS</th><th>Prefeitura</th><th>Trabalhista</th><th>Estadual</th>
+                </tr>
+              </thead>
+              <tbody id="linhas-certidoes"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- ---------- GUIAS ---------- -->
+    <main class="conteudo vista vista-unica" data-vista="guias">
+      <div class="coluna">
+        <div class="placa">
+          <h3>Guias ainda não existe</h3>
+          <p>Esta tela vai reunir DAS, DARF e GPS por cliente e competência. Ela depende de duas coisas que ainda não rodaram: a coleta automática no portal da Receita, para buscar as guias, e o histórico, para saber o que é nova, paga ou vencida.</p>
+          <p>Preferi deixar o aviso a montar uma tela bonita sem dado por trás.</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- ---------- RELATÓRIOS ---------- -->
+    <main class="conteudo vista vista-unica" data-vista="relatorios">
+      <div class="coluna"><div class="grade-3" id="relatorios"></div></div>
+    </main>
+
+    <!-- ---------- AJUSTES ---------- -->
+    <main class="conteudo vista vista-unica" data-vista="ajustes">
+      <div class="coluna">
+        <div class="grade-3" id="ajustes"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="modal"></div>
